@@ -32,21 +32,66 @@ Dawi-application/
 └── backend/   # FastAPI / Django backend, OCR pipeline, Gemini integration
 ```
 
-## 📱 App Screenshots & Overview
 
 ## 📱 App Screenshots & Overview
 
-| Screenshot | Feature Name | Description |
-| :---: | :--- | :--- |
-| <img src="https://github.com/user-attachments/assets/75f7154a-487c-4ec6-a1d2-70e08ed6b8ea" width="180" alt="Home Dashboard" /> | **Home Dashboard** | Main landing screen displaying quick status cards, metric counts for treatments/documents, quick action buttons, and active medication reminders. |
-| <img src="https://github.com/user-attachments/assets/8c82e6ee-2174-4ec5-8205-904c2a3d6aae" width="180" alt="Document Vault" /> | **Document Vault** | Centralized storage tab with category filters (Prescription, Lab Report, Medical) to organize and upload all patient medical records. |
-| <img src="https://github.com/user-attachments/assets/bd75e43e-7127-467f-9704-4ae7d9b2b903" width="180" alt="My Health" /> | **My Health** | Holistic overview of the patient profile, tracking active treatments, registered physicians, and recent documents with AI-generated previews. |
-| <img src="https://github.com/user-attachments/assets/3578ab07-0eb5-4c9e-82c0-dc9b4bd1f974" width="180" alt="Health Assistant" /> | **AI Health Assistant** | Multilingual conversational chat interface supporting Darija, Arabic, and English to answer dosage queries and help prepare for doctor visits. |
-| <img src="https://github.com/user-attachments/assets/a3e58309-9282-4810-8faf-4de595933739" width="180" alt="Profile" /> | **User Profile** | Account management screen displaying user details, preferred language settings, privacy options, and app security settings. |
-| <img src="https://github.com/user-attachments/assets/003e3a30-dcb3-40fd-8ac4-17d67b8c3aa8" width="180" alt="Scan Modal" /> | **Document Upload** | Action sheet modal giving users the option to instantly scan a document via camera or upload an existing file from their gallery. |
-| <img src="https://github.com/user-attachments/assets/1dda11b5-8438-4491-9d75-f8f60011d3e7" width="180" alt="AI Health Summary" /> | **AI Health Summary** | Structured analytical report synthesized from lab results and prescriptions, offering clear breakdowns and general wellness recommendations. |
-| <img src="https://github.com/user-attachments/assets/d9016bdc-c286-4bcf-93e9-65c4f7b13b05" width="180" alt="Multilingual Support" /> | **Multilingual AI** | Demonstrates the conversational capability and assistant versatility across regional languages like Moroccan Darija. |
+<div align="center">
 
+### 1. Home Dashboard
+<img src="https://github.com/user-attachments/assets/75f7154a-487c-4ec6-a1d2-70e08ed6b8ea" width="280" alt="Home Dashboard" />
+<br>
+<em>Main landing screen displaying quick status cards, metric counts for treatments/documents, quick action buttons, and active medication reminders.</em>
+
+---
+
+### 2. Document Vault
+<img src="https://github.com/user-attachments/assets/8c82e6ee-2174-4ec5-8205-904c2a3d6aae" width="280" alt="Document Vault" />
+<br>
+<em>Centralized storage tab with category filters (Prescription, Lab Report, Medical) to organize and upload all patient medical records.</em>
+
+---
+
+### 3. My Health
+<img src="https://github.com/user-attachments/assets/bd75e43e-7127-467f-9704-4ae7d9b2b903" width="280" alt="My Health" />
+<br>
+<em>Holistic overview of the patient profile, tracking active treatments, registered physicians, and recent documents with AI-generated previews.</em>
+
+---
+
+### 4. AI Health Assistant
+<img src="https://github.com/user-attachments/assets/3578ab07-0eb5-4c9e-82c0-dc9b4bd1f974" width="280" alt="Health Assistant" />
+<br>
+<em>Multilingual conversational chat interface supporting Darija, Arabic, and English to answer dosage queries and help prepare for doctor visits.</em>
+
+---
+
+### 5. User Profile
+<img src="https://github.com/user-attachments/assets/a3e58309-9282-4810-8faf-4de595933739" width="280" alt="Profile" />
+<br>
+<em>Account management screen displaying user details, preferred language settings, privacy options, and app security settings.</em>
+
+---
+
+### 6. Document Upload
+<img src="https://github.com/user-attachments/assets/003e3a30-dcb3-40fd-8ac4-17d67b8c3aa8" width="280" alt="Scan Modal" />
+<br>
+<em>Action sheet modal giving users the option to instantly scan a document via camera or upload an existing file from their gallery.</em>
+
+---
+
+### 7. AI Health Summary
+<img src="https://github.com/user-attachments/assets/1dda11b5-8438-4491-9d75-f8f60011d3e7" width="280" alt="AI Health Summary" />
+<br>
+<em>Structured analytical report synthesized from lab results and prescriptions, offering clear breakdowns and general wellness recommendations.</em>
+
+---
+
+### 8. Multilingual AI
+<img src="https://github.com/user-attachments/assets/d9016bdc-c286-4bcf-93e9-65c4f7b13b05" width="280" alt="Multilingual Support" />
+<br>
+<em>Demonstrates the conversational capability and assistant versatility across regional languages like Moroccan Darija.</em>
+
+</div>
 
 ## Getting started
 
