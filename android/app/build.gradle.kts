@@ -4,6 +4,7 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+
 android {
     namespace = "com.example.dawi_app"
     compileSdk = flutter.compileSdkVersion
