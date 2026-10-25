@@ -115,6 +115,3 @@ See the `backend/` directory for FastAPI/Django-specific setup instructions.
 
 Actively developed as part of an ongoing personal healthtech project.
 
-## Author
-
-**Rim Kaanane** — [GitHub](https://github.com/rimereld) · [LinkedIn](https://www.linkedin.com/in/kaananerim)
