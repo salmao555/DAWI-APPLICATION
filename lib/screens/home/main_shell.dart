@@ -64,9 +64,9 @@ class _MainShellState extends State<MainShell> {
             height: 64,
             padding: const EdgeInsets.symmetric(horizontal: 8),
             decoration: BoxDecoration(
-              color: AppColors.darkCard,
+              color: AppColors.navDark,
               borderRadius: BorderRadius.circular(32),
-              boxShadow: const [BoxShadow(color: Color(0x3314211F), blurRadius: 24, offset: Offset(0, 10))],
+              boxShadow: const [BoxShadow(color: Color(0x33072D44), blurRadius: 24, offset: Offset(0, 10))],
             ),
             child: Row(children: [
               for (var i = 0; i < _items.length; i++)
@@ -87,7 +87,7 @@ class _MainShellState extends State<MainShell> {
   }
 }
 
-/// Icon-only nav button: white circle with teal icon when selected.
+/// Icon-only nav button: white circle with deep blue icon when selected.
 class _NavItem extends StatelessWidget {
   final IconData icon;
   final IconData selectedIcon;

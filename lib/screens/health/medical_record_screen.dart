@@ -139,7 +139,7 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AiAssistantScreen())),
-        icon: const Icon(Icons.smart_toy_outlined, color: AppColors.teal),
+        icon: const Icon(Icons.smart_toy_outlined, color: AppColors.lightBlue),
         label: const Text('Ask Assistant'),
       ),
     );

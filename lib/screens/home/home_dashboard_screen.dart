@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -12,6 +10,8 @@ import '../../services/api_service.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/alive.dart';
 import '../../widgets/appointment_calendar_sheet.dart';
+import '../../widgets/curved_header_page.dart';
+import '../../widgets/pill_background.dart';
 import '../ai/ai_assistant_screen.dart';
 import '../appointments/appointments_screen.dart';
 import '../documents/document_details_screen.dart';
@@ -139,63 +139,43 @@ class HomeDashboardScreenState extends State<HomeDashboardScreen> {
       child: Scaffold(
         backgroundColor: Colors.transparent, // shell paints the gradient
         body: Stack(children: [
-          RefreshIndicator(
+          CurvedHeaderPage(
             onRefresh: () async => refresh(),
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _Header(
-                    firstName: firstName,
-                    subtitle: '$greeting · How are you feeling today?',
-                    initial: initial,
-                    onAvatarTap: () => MainShell.of(context)?.goToTab(4),
-                  ),
-                  // Content sheet (transparent over the gradient), pulled up by _sheetOverlap.
-                  // Bottom padding includes the floating nav bar's height (from MediaQuery).
-                  Transform.translate(
-                    offset: const Offset(0, -_sheetOverlap),
-                    child: Container(
-                      padding: EdgeInsets.fromLTRB(
-                        AppSpacing.lg,
-                        AppSpacing.lg,
-                        AppSpacing.lg,
-                        math.max(_minBottomPadding, AppSpacing.xl + MediaQuery.paddingOf(context).bottom),
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          FadeSlideIn(
-                            index: 0,
-                            child: _AskBar(onTap: () => _push(const AiAssistantScreen())),
-                          ),
-                          const SizedBox(height: AppSpacing.lg),
-                          FutureBuilder<_DashboardData>(
-                            future: _future,
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState == ConnectionState.waiting) {
-                                return const Padding(
-                                  padding: EdgeInsets.symmetric(vertical: AppSpacing.xl),
-                                  child: Center(child: CircularProgressIndicator()),
-                                );
-                              }
-                              if (snapshot.hasError) {
-                                return Padding(
-                                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
-                                  child: Text("Couldn't load your dashboard.\n${snapshot.error}",
-                                      style: const TextStyle(color: AppColors.textSecondary)),
-                                );
-                              }
-                              return _buildContent(snapshot.data!);
-                            },
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
+            headerBackground: const _HeaderBackground(),
+            header: _Header(
+              firstName: firstName,
+              subtitle: '$greeting · How are you feeling today?',
+              initial: initial,
+              onAvatarTap: () => MainShell.of(context)?.goToTab(4),
+            ),
+            body: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                FadeSlideIn(
+                  index: 0,
+                  child: _AskBar(onTap: () => _push(const AiAssistantScreen())),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                FutureBuilder<_DashboardData>(
+                  future: _future,
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Padding(
+                        padding: EdgeInsets.symmetric(vertical: AppSpacing.xl),
+                        child: Center(child: CircularProgressIndicator()),
+                      );
+                    }
+                    if (snapshot.hasError) {
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                        child: Text("Couldn't load your dashboard.\n${snapshot.error}",
+                            style: const TextStyle(color: AppColors.textSecondary)),
+                      );
+                    }
+                    return _buildContent(snapshot.data!);
+                  },
+                ),
+              ],
             ),
           ),
           if (_isUploading)
@@ -237,8 +217,8 @@ class HomeDashboardScreenState extends State<HomeDashboardScreen> {
             child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
               Expanded(
                 child: StatCard(
-                  icon: Icons.medication_outlined,
-                  label: 'Treatments',
+                  image: 'assets/images/caduceus.png',
+                  label: _plural(data.activeMedications.length, 'Treatment'),
                   value: '${data.activeMedications.length}',
                   colors: _cardFill,
                   onTap: () => _push(const MedicationsScreen()),
@@ -247,8 +227,8 @@ class HomeDashboardScreenState extends State<HomeDashboardScreen> {
               const SizedBox(width: 12),
               Expanded(
                 child: StatCard(
-                  icon: Icons.event_outlined,
-                  label: 'Appointments',
+                  image: 'assets/images/heart.png',
+                  label: _plural(data.upcomingAppointments.length, 'Appointment'),
                   value: '${data.upcomingAppointments.length}',
                   colors: _cardFill,
                   onTap: () => _push(const AppointmentsScreen()),
@@ -257,8 +237,8 @@ class HomeDashboardScreenState extends State<HomeDashboardScreen> {
               const SizedBox(width: 12),
               Expanded(
                 child: StatCard(
-                  icon: Icons.description_outlined,
-                  label: 'Documents',
+                  image: 'assets/images/dna.png',
+                  label: _plural(data.recentDocuments.length, 'Document'),
                   value: '${data.recentDocuments.length}',
                   colors: _cardFill,
                   onTap: () => MainShell.of(context)?.goToTab(1),
@@ -335,11 +315,11 @@ class HomeDashboardScreenState extends State<HomeDashboardScreen> {
   }
 }
 
-/// Stat card fill: white 85% (StatCard uses dark text and a teal icon on mint).
-const List<Color> _cardFill = [Color(0xD9FFFFFF), Color(0xD9FFFFFF)];
+/// Stat card fill: white 90% (StatCard uses deep blue numbers and icon on a sky blue -> mauve circle).
+const List<Color> _cardFill = [AppColors.cardBackground, AppColors.cardBackground];
 
-/// Keeps the last content clear of the floating nav bar.
-const double _minBottomPadding = 120;
+/// "1 Treatment", but "0 Treatments" / "2 Treatments".
+String _plural(int count, String singular) => count == 1 ? singular : '${singular}s';
 
 /// e.g. "Your Cardiology is on Sat 12 Dec at 02:04." — falls back to the raw
 /// date string if it isn't "YYYY-MM-DD".
@@ -351,10 +331,8 @@ String _appointmentText(ApiAppointment a) {
   return 'Your $what is on $date$at.';
 }
 
-/// How far the content sheet slides up over the teal header.
-const double _sheetOverlap = 24;
-
-/// Full-width teal header: welcome text, mint subtitle, avatar.
+/// Header content: welcome text, light blue subtitle, avatar. The navy
+/// gradient and layout come from [CurvedHeaderPage].
 class _Header extends StatelessWidget {
   final String firstName;
   final String subtitle;
@@ -363,47 +341,60 @@ class _Header extends StatelessWidget {
   const _Header({required this.firstName, required this.subtitle, required this.initial, required this.onAvatarTap});
 
   @override
-  Widget build(BuildContext context) => Container(
-        decoration: const BoxDecoration(
-          color: AppColors.primary,
-          borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
-        ),
-        padding: EdgeInsets.fromLTRB(
-          AppSpacing.lg,
-          MediaQuery.paddingOf(context).top + AppSpacing.lg,
-          AppSpacing.lg,
-          AppSpacing.md + _sheetOverlap, // ~30% less empty space than xl
-        ),
-        child: FadeSlideIn(
-          child: Row(children: [
-            Expanded(
-              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text('Welcome, $firstName!',
-                    style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w700, height: 1.2)),
-                const SizedBox(height: 4),
-                Text(subtitle, style: const TextStyle(color: AppColors.mint, fontSize: 13.5)),
-              ]),
+  Widget build(BuildContext context) => FadeSlideIn(
+        child: Row(children: [
+          Expanded(
+            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+              Text('Welcome, $firstName!',
+                  style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w700, height: 1.2)),
+              const SizedBox(height: 4),
+              Text(subtitle, style: const TextStyle(color: AppColors.lightBlue, fontSize: 13.5)),
+            ]),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          PressableScale(
+            onTap: onAvatarTap,
+            borderRadius: 26,
+            child: Container(
+              width: 52,
+              height: 52,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: Colors.white,
+                border: Border.all(color: AppColors.lightBlue, width: 3),
+              ),
+              child: Text(initial,
+                  style: const TextStyle(color: AppColors.navy, fontSize: 20, fontWeight: FontWeight.w700)),
             ),
-            const SizedBox(width: AppSpacing.md),
-            PressableScale(
-              onTap: onAvatarTap,
-              borderRadius: 26,
-              child: Container(
-                width: 52,
-                height: 52,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: Colors.white,
-                  border: Border.all(color: AppColors.mint, width: 3),
-                ),
-                child: Text(initial,
-                    style: const TextStyle(color: AppColors.deepTeal, fontSize: 20, fontWeight: FontWeight.w700)),
+          ),
+        ]),
+      );
+}
+
+/// Faint dusty blue glow bottom-right plus light floating pills, behind the
+/// header content. PillBackground is a RepaintBoundary + IgnorePointer, so
+/// the avatar stays tappable.
+class _HeaderBackground extends StatelessWidget {
+  const _HeaderBackground();
+
+  @override
+  Widget build(BuildContext context) => const Stack(children: [
+        Positioned.fill(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              gradient: RadialGradient(
+                center: Alignment.bottomRight,
+                radius: 1.1,
+                colors: [Color(0x666E7F9A), Color(0x006E7F9A)], // dustyBlue 40% -> clear
               ),
             ),
-          ]),
+          ),
         ),
-      );
+        Positioned.fill(
+          child: PillBackground(opacity: 0.07, count: 9, minSize: 20, maxSize: 40, drift: 6, extraPeriod: 1),
+        ),
+      ]);
 }
 
 /// Search-style pill that opens the AI assistant.
@@ -442,7 +433,7 @@ class _AskBar extends StatelessWidget {
       );
 }
 
-/// 64x64 translucent rounded tile with an outlined teal icon, label below.
+/// 64x64 translucent rounded tile; deep blue icon on a sky blue -> mauve circle, label below.
 class _QuickAction extends StatelessWidget {
   final IconData icon;
   final String label;
@@ -458,10 +449,16 @@ class _QuickAction extends StatelessWidget {
             width: 64,
             height: 64,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.7),
+              color: Colors.white.withValues(alpha: 0.8),
               borderRadius: BorderRadius.circular(20),
             ),
-            child: Icon(icon, color: AppColors.primary, size: 28),
+            alignment: Alignment.center,
+            child: Container(
+              width: 44,
+              height: 44,
+              decoration: const BoxDecoration(shape: BoxShape.circle, gradient: AppColors.iconBubbleGradient),
+              child: Icon(icon, color: AppColors.primary, size: 24),
+            ),
           ),
         ),
         const SizedBox(height: AppSpacing.sm),
@@ -475,7 +472,7 @@ class _QuickAction extends StatelessWidget {
       ]);
 }
 
-/// Amber banner for the next appointment (the only non-teal accent).
+/// Blush banner for the next appointment, dark rose icon and text.
 /// Tapping opens the appointment calendar.
 class _AlertBanner extends StatelessWidget {
   final String text;
@@ -491,15 +488,15 @@ class _AlertBanner extends StatelessWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.6), shape: BoxShape.circle),
-            child: const Icon(Icons.notifications_active_outlined, color: AppColors.textPrimary, size: 20),
+            child: const Icon(Icons.notifications_active_outlined, color: AppColors.roseDark, size: 20),
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Text(text,
-                style: const TextStyle(fontSize: 13.5, height: 1.4, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+                style: const TextStyle(fontSize: 13.5, height: 1.4, fontWeight: FontWeight.w600, color: AppColors.roseDark)),
           ),
           const SizedBox(width: AppSpacing.sm),
-          const Icon(Icons.chevron_right_rounded, color: AppColors.textPrimary),
+          const Icon(Icons.chevron_right_rounded, color: AppColors.roseDark),
         ]),
       );
 }

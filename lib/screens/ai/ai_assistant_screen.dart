@@ -114,7 +114,7 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
                 padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.sm, AppSpacing.md, 0),
                 child: Row(children: [
                   const CircleAvatar(
-                      radius: 18, backgroundColor: AppColors.darkCard, child: Icon(Icons.smart_toy_outlined, size: 18, color: AppColors.teal)),
+                      radius: 18, backgroundColor: AppColors.darkCard, child: Icon(Icons.smart_toy_outlined, size: 18, color: AppColors.lightBlue)),
                   const SizedBox(width: AppSpacing.sm),
                   const Text('Health Assistant', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18)),
                 ]),

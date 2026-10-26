@@ -11,7 +11,7 @@ import '../home/main_shell.dart';
 import '../onboarding/onboarding_screen.dart';
 
 /// Minimal splash screen (spec section 1): DAWI wordmark, medical icon and
-/// Arabic name on deep teal, then automatic navigation to onboarding,
+/// Arabic name on navy, then automatic navigation to onboarding,
 /// login, or the main app shell depending on whether onboarding was seen
 /// and whether a saved session restores successfully.
 class SplashScreen extends StatefulWidget {
@@ -51,10 +51,10 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.deepTeal,
+      backgroundColor: AppColors.navy,
       body: Stack(
         children: [
-          const Positioned.fill(child: PillBackground(opacity: 0.1)),
+          const Positioned.fill(child: PillBackground(opacity: 0.08)),
           Center(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -68,7 +68,7 @@ class _SplashScreenState extends State<SplashScreen> {
                   width: 104,
                   height: 104,
                   decoration: const BoxDecoration(color: AppColors.mint, shape: BoxShape.circle),
-                  child: const Icon(Icons.health_and_safety_rounded, color: AppColors.deepTeal, size: 52),
+                  child: const Icon(Icons.health_and_safety_rounded, color: AppColors.navy, size: 52),
                 ),
                 const SizedBox(height: AppSpacing.lg),
                 Text(

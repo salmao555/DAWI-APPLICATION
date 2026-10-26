@@ -42,7 +42,7 @@ class AppointmentsScreenState extends State<AppointmentsScreen> {
       appBar: AppBar(title: const Text('Appointments')),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _addAppointment,
-        icon: const Icon(Icons.add, color: AppColors.teal),
+        icon: const Icon(Icons.add, color: AppColors.lightBlue),
         label: const Text('Add appointment'),
       ),
       body: SafeArea(

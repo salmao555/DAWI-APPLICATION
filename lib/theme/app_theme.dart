@@ -2,51 +2,85 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 /// Central place for colors, spacing and the app's [ThemeData].
-/// Style: clean teal medical UI — pale mint background, white cards with
-/// 24px radii and soft teal-tinted shadows, a single teal accent.
+/// Style: navy/blue medical UI — dark navy anchors (header, nav, splash),
+/// pale blue page background, translucent white cards with 24px radii and
+/// soft blue-tinted shadows, deep blue for buttons and selected states.
 class AppColors {
   AppColors._();
 
   // Palette
-  static const Color teal = Color(0xFF1FB5A6);
-  static const Color deepTeal = Color(0xFF0E8C85);
-  static const Color mint = Color(0xFFE3F6F3);
-  static const Color alertAmber = Color(0xFFFFE9B5); // appointment banner only
-  static const Color navDark = Color(0xFF14211F); // floating nav pill
-  static const Color darkCard = Color(0xD914211F); // navDark 85%: home stat cards, profile hero
+  static const Color navy = Color(0xFF072D44);
+  static const Color deepBlue = Color(0xFF064469);
+  static const Color midBlue = Color(0xFF5790AB);
+  static const Color lightBlue = Color(0xFF9CCDDB);
+  static const Color greyBlue = Color(0xFFD0D7E1);
 
-  // Main-screen background gradient (top -> bottom)
-  static const Color backgroundTop = Color(0xFFCDEBE6);
-  static const Color backgroundBottom = Color(0xFFF3F1EA);
+  // Warm accents
+  static const Color dustyBlue = Color(0xFF6E7F9A); // header glow
+  static const Color skyBlue = Color(0xFF93B5C6);
+  static const Color grey = Color(0xFFC9CCD5);
+  static const Color mauve = Color(0xFFE4D8DC);
+  static const Color blush = Color(0xFFFFE3E3);
+  static const Color roseDark = Color(0xFF8C3B4A); // icon/text on blush (6:1)
 
-  // Core (names kept so existing screens keep compiling)
-  static const Color primary = teal; // buttons, nav, accents
+  /// Appointment banner fill. Name kept from the old amber; now blush.
+  static const Color alertAmber = blush;
+
+  /// Icon circle fill: lightBlue at 45% (flat fallback; see [iconBubbleGradient]).
+  static const Color iconBubble = Color(0x739CCDDB);
+
+  /// Icon circles: soft diagonal sky blue -> mauve. Use deepBlue icons on it.
+  static const LinearGradient iconBubbleGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+    colors: [Color(0x9993B5C6), mauve], // skyBlue 60% -> mauve
+  );
+
+  // Old names kept so existing screens compile; values are the blue palette.
+  static const Color teal = midBlue; // accent icons
+  static const Color deepTeal = deepBlue;
+  static const Color mint = Color(0xFFD2E8EF); // lightBlue 45% over white, as a solid
+  static const Color navDark = navy; // floating nav pill, splash
+  static const Color darkCard = deepBlue; // dark pills, selected chips, profile hero
+
+  // Main-screen background: diagonal gradient from backgroundTop
+  // (top-left) to backgroundBottom (bottom-right), over backgroundBase.
+  static const Color backgroundBase = Color(0xFFF5F8FA);
+  static const Color backgroundTop = Color(0x5993B5C6); // skyBlue 35%
+  static const Color backgroundBottom = Color(0x99FFE3E3); // blush 60%
+
+  // Core
+  static const Color primary = deepBlue; // buttons, selected states
   static const Color primaryLight = mint;
-  static const Color secondary = deepTeal;
-  static const Color scaffoldBackground = mint;
-  static const Color cardBackground = Color(0xCCFFFFFF); // white 80%, lets the gradient through
+  static const Color secondary = midBlue; // links, secondary text buttons
+  static const Color scaffoldBackground = backgroundBase;
+  static const Color cardBackground = Color(0xE6FFFFFF); // white 90%, lets the gradient through
 
   static const Color mintBackground = mint;
 
   // Text
-  static const Color textPrimary = Color(0xFF17303A);
-  static const Color textSecondary = Color(0xFF6B8790);
+  static const Color textPrimary = navy;
+  // Darker than the spec's #5E7A8C so it passes AA (4.5:1) on the
+  // sky blue / blush background as well as on white.
+  static const Color textSecondary = Color(0xFF4A6072);
 
   // Status / misc
   static const Color success = Color(0xFF2FB273);
-  static const Color divider = Color(0xFFDCEDEA);
-  static const Color chipBackground = Color(0xFFEEF8F6);
+  static const Color divider = greyBlue;
+  static const Color chipBackground = Color(0xFFEEF2F6);
 
-  // Old accent panel names, all mapped to the single teal accent.
+  // Old accent panel names, all mapped to the single blue accent.
   static const Color tealPanel = mint;
   static const Color lilacPanel = mint;
-  static const Color lilacDark = deepTeal;
+  static const Color lilacDark = deepBlue;
   static const Color peachPanel = mint;
 
-  // Kept for compatibility; flat (no gradients in this theme).
-  static const Color gradientTop = deepTeal;
-  static const Color gradientBottom = deepTeal;
+  // Header gradient: navy -> deep blue.
+  static const Color gradientTop = navy;
+  static const Color gradientBottom = deepBlue;
   static const LinearGradient heroGradient = LinearGradient(
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
     colors: [gradientTop, gradientBottom],
   );
 }
@@ -67,14 +101,14 @@ class AppRadius {
   static const double field = 20;
 }
 
-/// Dark pill for secondary actions (the nav-pill look): white label, teal icon.
+/// Deep blue pill for secondary actions: white label, light blue icon.
 class AppButtons {
   AppButtons._();
 
   static final ButtonStyle dark = OutlinedButton.styleFrom(
     backgroundColor: AppColors.darkCard,
     foregroundColor: Colors.white,
-    iconColor: AppColors.teal,
+    iconColor: AppColors.lightBlue,
     side: BorderSide.none,
   );
 }
@@ -85,7 +119,7 @@ class AppShadows {
   /// Use in Container(decoration: BoxDecoration(boxShadow: AppShadows.soft))
   static const List<BoxShadow> soft = [
     BoxShadow(
-      color: Color(0x0F0E8C85),
+      color: Color(0x1A064469), // deepBlue 10%
       blurRadius: 16,
       offset: Offset(0, 6),
     ),
@@ -147,7 +181,7 @@ class AppTheme {
       cardTheme: CardThemeData(
         color: AppColors.cardBackground,
         elevation: 1,
-        shadowColor: const Color(0x140E8C85),
+        shadowColor: const Color(0x1A064469),
         surfaceTintColor: Colors.transparent,
         margin: EdgeInsets.zero,
         shape: RoundedRectangleBorder(
@@ -200,7 +234,7 @@ class AppTheme {
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.chipBackground,
         selectedColor: AppColors.darkCard,
-        checkmarkColor: AppColors.teal,
+        checkmarkColor: AppColors.lightBlue,
         side: BorderSide.none,
         shape: const StadiumBorder(),
         labelStyle: TextStyle(
@@ -222,18 +256,18 @@ class AppTheme {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.field),
-          borderSide: BorderSide.none,
+          borderSide: const BorderSide(color: AppColors.greyBlue),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppRadius.field),
-          borderSide: const BorderSide(color: AppColors.secondary, width: 2),
+          borderSide: const BorderSide(color: AppColors.primary, width: 2),
         ),
       ),
       navigationBarTheme: NavigationBarThemeData(
         backgroundColor: Colors.white,
         surfaceTintColor: Colors.transparent,
         elevation: 8,
-        shadowColor: const Color(0x220E8C85),
+        shadowColor: const Color(0x1A064469),
         height: 72,
         indicatorColor: AppColors.primary,
         indicatorShape: const StadiumBorder(),
@@ -257,14 +291,14 @@ class AppTheme {
       tabBarTheme: const TabBarThemeData(
         labelColor: AppColors.textPrimary,
         unselectedLabelColor: AppColors.textSecondary,
-        indicatorColor: AppColors.teal,
+        indicatorColor: AppColors.primary,
         dividerColor: Colors.transparent,
       ),
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith((states) =>
-            states.contains(WidgetState.selected) ? AppColors.teal : AppColors.textSecondary),
+            states.contains(WidgetState.selected) ? Colors.white : AppColors.textSecondary),
         trackColor: WidgetStateProperty.resolveWith((states) =>
-            states.contains(WidgetState.selected) ? AppColors.navDark : AppColors.chipBackground),
+            states.contains(WidgetState.selected) ? AppColors.primary : AppColors.greyBlue),
         trackOutlineColor: const WidgetStatePropertyAll(Colors.transparent),
       ),
       bottomSheetTheme: const BottomSheetThemeData(

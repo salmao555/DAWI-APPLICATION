@@ -57,7 +57,7 @@ class MedicationsScreenState extends State<MedicationsScreen> with SingleTickerP
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _addMedication,
-        icon: const Icon(Icons.add, color: AppColors.teal),
+        icon: const Icon(Icons.add, color: AppColors.lightBlue),
         label: const Text('Add medication'),
       ),
       body: SafeArea(

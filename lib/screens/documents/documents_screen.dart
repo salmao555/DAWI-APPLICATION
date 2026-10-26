@@ -102,7 +102,7 @@ class DocumentsScreenState extends State<DocumentsScreen> {
       appBar: AppBar(title: const Text('Documents')),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _isUploading ? null : _showScanUploadSheet,
-        icon: const Icon(Icons.add, color: AppColors.teal),
+        icon: const Icon(Icons.add, color: AppColors.lightBlue),
         label: const Text('Add document'),
       ),
       body: SafeArea(

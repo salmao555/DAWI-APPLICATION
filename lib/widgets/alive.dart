@@ -1,10 +1,13 @@
+import 'dart:math' as math;
+import 'dart:ui' show ImageFilter;
+
 import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
 
 /// Card color presets used across the app. Names are kept from the old
 /// gradient set, but each is now flat (both stops identical): white cards,
-/// with [navy] as the solid deep-teal accent.
+/// with [navy] as the solid deep blue accent.
 class AppGradients {
   AppGradients._();
 
@@ -116,7 +119,7 @@ class _PressableScaleState extends State<PressableScale> {
   }
 }
 
-/// Rounded card with a flat fill, soft teal-tinted shadow and
+/// Rounded card with a flat fill, soft blue-tinted shadow and
 /// hover/press effect. A gradient is only drawn if [colors] differ.
 class GradientCard extends StatelessWidget {
   const GradientCard({
@@ -160,80 +163,174 @@ class GradientCard extends StatelessWidget {
   }
 }
 
-/// Compact stat card: icon bubble, number, short label.
-class StatCard extends StatelessWidget {
+/// Compact stat card: a picture in the top-right corner, then a large
+/// number and its label bottom-left. The picture floats slowly and grows a
+/// little while the card is hovered or pressed.
+class StatCard extends StatefulWidget {
   const StatCard({
     super.key,
-    required this.icon,
+    required this.image,
     required this.value,
     required this.label,
     required this.colors,
     this.onTap,
   });
 
-  final IconData icon;
+  /// Asset path of a transparent PNG.
+  final String image;
   final String value;
   final String label;
   final List<Color> colors;
   final VoidCallback? onTap;
 
   @override
+  State<StatCard> createState() => _StatCardState();
+}
+
+class _StatCardState extends State<StatCard> {
+  bool _hover = false;
+  bool _down = false;
+
+  @override
   Widget build(BuildContext context) {
-    final fg = foregroundOn(colors.first);
-    return GradientCard(
-      colors: colors,
-      onTap: onTap,
-      radius: AppRadius.card,
-      padding: const EdgeInsets.all(14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          _IconBubble(icon: icon, onDark: fg == Colors.white, size: 36),
-          const SizedBox(height: 12),
-          Text(
-            value,
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.w700,
-              color: fg,
-              height: 1,
+    final fg = foregroundOn(widget.colors.first);
+    // Listener/MouseRegion only observe, so PressableScale still gets taps.
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hover = true),
+      onExit: (_) => setState(() => _hover = _down = false),
+      child: Listener(
+        onPointerDown: (_) => setState(() => _down = true),
+        onPointerUp: (_) => setState(() => _down = false),
+        onPointerCancel: (_) => setState(() => _down = false),
+        child: GradientCard(
+          colors: widget.colors,
+          onTap: widget.onTap,
+          radius: AppRadius.card,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+          child: Stack(clipBehavior: Clip.none, children: [
+            // Same total height as the old icon (36) + gap (12) + 22px number.
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const SizedBox(height: 42),
+                Text(
+                  widget.value,
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.w800,
+                    color: fg == Colors.white ? fg : AppColors.deepBlue,
+                    height: 1,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                // Shrinks a little instead of truncating ("Appointments" on narrow phones).
+                FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    widget.label,
+                    maxLines: 1,
+                    style: TextStyle(
+                      fontSize: 11.5,
+                      fontWeight: FontWeight.w500,
+                      color: fg == Colors.white ? fg.withValues(alpha: 0.8) : AppColors.textSecondary,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: TextStyle(
-              fontSize: 11.5,
-              fontWeight: FontWeight.w500,
-              color: fg == Colors.white ? fg.withValues(alpha: 0.8) : AppColors.textSecondary,
+            // Nudged into the padding and tilted so it looks placed, not boxed.
+            Positioned(
+              top: -8,
+              right: -6,
+              child: AnimatedScale(
+                scale: _hover || _down ? 1.06 : 1,
+                duration: const Duration(milliseconds: 150),
+                curve: Curves.easeOut,
+                child: _FloatingImage(asset: widget.image),
+              ),
             ),
-          ),
-        ],
+          ]),
+        ),
       ),
     );
   }
 }
 
-/// Teal icon on a mint circle (white-on-translucent on dark cards).
+/// Tilted picture with a soft blurred shadow, drifting +-3px on a 4s loop.
+class _FloatingImage extends StatefulWidget {
+  const _FloatingImage({required this.asset});
+
+  final String asset;
+
+  @override
+  State<_FloatingImage> createState() => _FloatingImageState();
+}
+
+class _FloatingImageState extends State<_FloatingImage> with SingleTickerProviderStateMixin {
+  static const double _height = 56;
+
+  late final AnimationController _controller =
+      AnimationController(vsync: this, duration: const Duration(seconds: 4))..repeat();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final image = Image.asset(widget.asset, height: _height, fit: BoxFit.contain);
+    return RepaintBoundary(
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, child) => Transform.translate(
+          offset: Offset(0, 3 * math.sin(2 * math.pi * _controller.value)),
+          child: child,
+        ),
+        child: Transform.rotate(
+          angle: -0.12,
+          child: Stack(children: [
+            // Shadow: the same picture, tinted deep blue, blurred and offset.
+            Transform.translate(
+              offset: const Offset(0, 4),
+              child: ImageFiltered(
+                imageFilter: ImageFilter.blur(sigmaX: 4, sigmaY: 4),
+                child: ColorFiltered(
+                  colorFilter: const ColorFilter.mode(Color(0x40064469), BlendMode.srcIn),
+                  child: image,
+                ),
+              ),
+            ),
+            image,
+          ]),
+        ),
+      ),
+    );
+  }
+}
+
+/// Deep blue icon on a sky blue -> mauve circle (white-on-translucent on dark cards).
 class _IconBubble extends StatelessWidget {
-  const _IconBubble({required this.icon, required this.onDark, this.size = 44});
+  const _IconBubble({required this.icon, required this.onDark});
+
+  static const double _size = 44;
 
   final IconData icon;
   final bool onDark;
-  final double size;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: size,
-      height: size,
+      width: _size,
+      height: _size,
       decoration: BoxDecoration(
-        color: onDark ? Colors.white.withValues(alpha: 0.2) : AppColors.mint,
+        color: onDark ? Colors.white.withValues(alpha: 0.2) : null,
+        gradient: onDark ? null : AppColors.iconBubbleGradient,
         shape: BoxShape.circle,
       ),
-      child: Icon(icon, size: size * 0.5, color: onDark ? Colors.white : AppColors.teal),
+      child: Icon(icon, size: _size * 0.5, color: onDark ? Colors.white : AppColors.deepBlue),
     );
   }
 }
@@ -315,7 +412,7 @@ class SectionTitle extends StatelessWidget {
       Text(text, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 17, color: AppColors.textPrimary));
 }
 
-/// Shared list row: translucent white, soft shadow, teal icon on a mint
+/// Shared list row: translucent white, soft shadow, deep blue icon on a sky blue -> mauve
 /// circle (or a custom [leading]), chevron when tappable. [trailing]
 /// replaces the chevron (e.g. a value or a badge). [destructive] tints the
 /// icon and title red.
@@ -345,7 +442,7 @@ class AppTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final accent = destructive ? Colors.redAccent : AppColors.teal;
+    final accent = destructive ? Colors.redAccent : AppColors.deepBlue;
     return Padding(
       padding: margin,
       child: PressableScale(
@@ -363,7 +460,8 @@ class AppTile extends StatelessWidget {
                   width: 44,
                   height: 44,
                   decoration: BoxDecoration(
-                    color: destructive ? Colors.redAccent.withValues(alpha: 0.12) : AppColors.mint,
+                    color: destructive ? Colors.redAccent.withValues(alpha: 0.12) : null,
+                    gradient: destructive ? null : AppColors.iconBubbleGradient,
                     shape: BoxShape.circle,
                   ),
                   child: Icon(icon, color: accent, size: 22),

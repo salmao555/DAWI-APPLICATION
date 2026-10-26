@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 
 import '../theme/app_theme.dart';
-import 'gradient_scaffold_background.dart';
+import 'curved_header_page.dart';
 import 'pill_background.dart';
 
-/// How far the form sheet slides up over the teal header.
-const double _sheetOverlap = 24;
-
-/// Shared layout for login / register / forgot password: teal header with
-/// the DAWI logo and a welcome line, then a white rounded sheet holding
-/// [child]. The whole page scrolls, so the form stays reachable with the
-/// keyboard open. A back button shows when there's a route to pop.
+/// Shared layout for login / register / forgot password: navy header with
+/// the DAWI logo and a welcome line, and the rounded content sheet
+/// ([CurvedHeaderPage]) holding [child] on a white card. The sheet scrolls,
+/// so the form stays reachable with the keyboard open. A back button shows
+/// when there's a route to pop.
 class AuthScaffold extends StatelessWidget {
   const AuthScaffold({super.key, required this.title, required this.subtitle, required this.child});
 
@@ -22,77 +20,46 @@ class AuthScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     final canPop = Navigator.canPop(context);
     return Scaffold(
-      body: GradientScaffoldBackground(
-        child: SingleChildScrollView(
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              ClipRRect(
-                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(32)),
-                child: Container(
-                  color: AppColors.primary,
-                  child: Stack(
-                    children: [
-                      const Positioned.fill(child: PillBackground(opacity: 0.08)),
-                      Padding(
-                        padding: EdgeInsets.fromLTRB(
-                          AppSpacing.lg,
-                          MediaQuery.paddingOf(context).top + AppSpacing.md,
-                          AppSpacing.lg,
-                          AppSpacing.xl + _sheetOverlap,
-                        ),
-                        child: Column(
-                          children: [
-                            Align(
-                              alignment: Alignment.centerLeft,
-                              child: SizedBox(
-                                height: 40,
-                                child: canPop
-                                    ? IconButton(
-                                        icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
-                                        tooltip: 'Back',
-                                        onPressed: () => Navigator.maybePop(context),
-                                      )
-                                    : null,
-                              ),
-                            ),
-                            const _Logo(),
-                            const SizedBox(height: AppSpacing.md),
-                            Text(
-                              title,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w700),
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              subtitle,
-                              textAlign: TextAlign.center,
-                              style: const TextStyle(color: AppColors.mint, fontSize: 13.5, height: 1.4),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+      body: CurvedHeaderPage(
+        headerBackground: const PillBackground(opacity: 0.08),
+        header: Column(
+          children: [
+            Align(
+              alignment: Alignment.centerLeft,
+              child: SizedBox(
+                height: 40,
+                child: canPop
+                    ? IconButton(
+                        icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
+                        tooltip: 'Back',
+                        onPressed: () => Navigator.maybePop(context),
+                      )
+                    : null,
               ),
-              Transform.translate(
-                offset: const Offset(0, -_sheetOverlap),
-                child: Container(
-                  margin: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
-                  padding: const EdgeInsets.all(AppSpacing.lg),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(28),
-                    boxShadow: AppShadows.soft,
-                  ),
-                  child: child,
-                ),
-              ),
-              SizedBox(height: MediaQuery.paddingOf(context).bottom),
-            ],
+            ),
+            const _Logo(),
+            const SizedBox(height: AppSpacing.md),
+            Text(
+              title,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.white, fontSize: 24, fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              subtitle,
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: AppColors.mint, fontSize: 13.5, height: 1.4),
+            ),
+          ],
+        ),
+        body: Container(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: AppShadows.soft,
           ),
+          child: child,
         ),
       ),
     );

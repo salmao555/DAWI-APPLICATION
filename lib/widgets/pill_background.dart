@@ -35,25 +35,60 @@ const _pills = [
 /// Decorative scattered medical icons that drift up and down slowly.
 /// Fills its parent; put it under the content in a Stack. Ignores pointers
 /// and is hidden from screen readers.
+///
+/// The defaults are the full splash pattern; [count], [minSize]/[maxSize],
+/// [drift] and [extraPeriod] make a lighter variant (e.g. the Home header).
 class PillBackground extends StatefulWidget {
-  const PillBackground({super.key, this.color = Colors.white, this.opacity = 0.09});
+  const PillBackground({
+    super.key,
+    this.color = Colors.white,
+    this.opacity = 0.09,
+    this.count = 14,
+    this.minSize = 24,
+    this.maxSize = 56,
+    this.drift = 8,
+    this.extraPeriod = 0,
+  });
 
   final Color color;
   final double opacity;
+
+  /// How many icons to show (1-14), picked evenly across the layout.
+  final int count;
+
+  /// Icon sizes are remapped from the base 24-56 range onto this range.
+  final double minSize;
+  final double maxSize;
+
+  /// Vertical float distance in px (each way).
+  final double drift;
+
+  /// Seconds added to every icon's 4-6s float period.
+  final int extraPeriod;
 
   @override
   State<PillBackground> createState() => _PillBackgroundState();
 }
 
 class _PillBackgroundState extends State<PillBackground> with SingleTickerProviderStateMixin {
-  // 60s is a multiple of every period (4/5/6s), so the loop is seamless.
-  static const _loopSeconds = 60;
-  static const _drift = 8.0;
+  late final List<_Pill> _shown = [
+    for (var i = 0; i < widget.count.clamp(1, _pills.length); i++)
+      _pills[i * _pills.length ~/ widget.count.clamp(1, _pills.length)],
+  ];
+
+  // The loop length is a multiple of every period, so it's seamless
+  // (60s for the default 4/5/6s periods).
+  late final int _loopSeconds = _shown.map((p) => p.period + widget.extraPeriod).fold(1, _lcm);
 
   late final AnimationController _controller = AnimationController(
     vsync: this,
-    duration: const Duration(seconds: _loopSeconds),
+    duration: Duration(seconds: _loopSeconds),
   )..repeat();
+
+  static int _lcm(int a, int b) => a * b ~/ _gcd(a, b);
+  static int _gcd(int a, int b) => b == 0 ? a : _gcd(b, a % b);
+
+  double _size(_Pill p) => widget.minSize + (p.size - 24) / (56 - 24) * (widget.maxSize - widget.minSize);
 
   @override
   void dispose() {
@@ -75,16 +110,17 @@ class _PillBackgroundState extends State<PillBackground> with SingleTickerProvid
                 return Stack(
                   clipBehavior: Clip.hardEdge,
                   children: [
-                    for (final p in _pills)
+                    for (final p in _shown)
                       Positioned(
-                        left: p.x * constraints.maxWidth - p.size / 2,
+                        left: p.x * constraints.maxWidth - _size(p) / 2,
                         top:
                             p.y * constraints.maxHeight -
-                            p.size / 2 +
-                            _drift * math.sin(2 * math.pi * (seconds / p.period + p.phase)),
+                            _size(p) / 2 +
+                            widget.drift *
+                                math.sin(2 * math.pi * (seconds / (p.period + widget.extraPeriod) + p.phase)),
                         child: Transform.rotate(
                           angle: p.rotation,
-                          child: Icon(p.icon, size: p.size, color: color),
+                          child: Icon(p.icon, size: _size(p), color: color),
                         ),
                       ),
                   ],
