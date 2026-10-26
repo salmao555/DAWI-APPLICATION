@@ -24,7 +24,7 @@ class HealthKeepApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => AuthProvider()),
       ],
       child: MaterialApp(
-        title: 'HealthKeep',
+        title: 'DAWI',
         debugShowCheckedModeBanner: false,
         theme: AppTheme.light(),
         home: const SplashScreen(),

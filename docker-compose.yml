@@ -1,0 +1,27 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "8000:8000"
+    env_file:
+      - path: ./backend/.env
+        required: false
+    environment:
+      DATABASE_URL: sqlite:////app/data/rx_scanner.db
+      ALLOWED_ORIGINS: "*"
+    volumes:
+      - ./data:/app/data
+      - ./uploads:/app/app/uploads
+    restart: unless-stopped
+
+  # Serves the prebuilt Flutter web app (run `flutter build web --release` first).
+  frontend:
+    image: nginx:alpine
+    ports:
+      - "8080:80"
+    volumes:
+      - ./build/web:/usr/share/nginx/html:ro
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - backend
+    restart: unless-stopped

@@ -68,6 +68,7 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
                     child: OutlinedButton.icon(
                       icon: const Icon(Icons.medication_outlined, size: 18),
                       label: const Text('Medications'),
+                      style: _darkButtonStyle,
                       onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MedicationsScreen())),
                     ),
                   ),
@@ -76,6 +77,7 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
                     child: OutlinedButton.icon(
                       icon: const Icon(Icons.event_outlined, size: 18),
                       label: const Text('Appointments'),
+                      style: _darkButtonStyle,
                       onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AppointmentsScreen())),
                     ),
                   ),
@@ -142,6 +144,13 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
     );
   }
 }
+
+/// Same dark as the floating nav pill, with light text/icon and no border.
+final ButtonStyle _darkButtonStyle = OutlinedButton.styleFrom(
+  backgroundColor: AppColors.navDark,
+  foregroundColor: Colors.white,
+  side: BorderSide.none,
+);
 
 class _InfoRow extends StatelessWidget {
   final String label;

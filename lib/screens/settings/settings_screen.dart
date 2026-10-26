@@ -74,7 +74,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               trailing: const Icon(Icons.chevron_right),
               onTap: () => showAboutDialog(
                 context: context,
-                applicationName: 'HealthKeep',
+                applicationName: 'DAWI',
                 applicationVersion: '1.0.0 (MVP)',
                 children: const [Text('Your health, organized and understood.')],
               ),

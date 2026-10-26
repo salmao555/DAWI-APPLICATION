@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/auth_provider.dart';
@@ -8,10 +9,10 @@ import '../auth/login_screen.dart';
 import '../home/main_shell.dart';
 import '../onboarding/onboarding_screen.dart';
 
-/// Minimal splash screen (spec section 1): logo, name, tagline, loading
-/// animation, then automatic navigation to onboarding, login, or the main
-/// app shell depending on whether onboarding was seen and whether a saved
-/// session restores successfully.
+/// Minimal splash screen (spec section 1): DAWI wordmark, medical icon and
+/// Arabic name on deep teal, then automatic navigation to onboarding,
+/// login, or the main app shell depending on whether onboarding was seen
+/// and whether a saved session restores successfully.
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
@@ -49,35 +50,43 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppColors.primary,
+      backgroundColor: AppColors.deepTeal,
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              width: 84,
-              height: 84,
-              decoration: BoxDecoration(
+            const Text(
+              'DAWI',
+              style: TextStyle(
                 color: Colors.white,
-                borderRadius: BorderRadius.circular(24),
+                fontSize: 56,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 6,
               ),
-              child: const Icon(Icons.health_and_safety_rounded, color: AppColors.primary, size: 44),
             ),
             const SizedBox(height: AppSpacing.lg),
-            const Text(
-              'HealthKeep',
-              style: TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w800),
+            Container(
+              width: 104,
+              height: 104,
+              decoration: const BoxDecoration(
+                color: AppColors.mint,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.health_and_safety_rounded,
+                color: AppColors.deepTeal,
+                size: 52,
+              ),
             ),
-            const SizedBox(height: AppSpacing.xs),
-            const Text(
-              'Your health, organized and understood.',
-              style: TextStyle(color: Colors.white70, fontSize: 14),
-            ),
-            const SizedBox(height: AppSpacing.xl),
-            const SizedBox(
-              width: 28,
-              height: 28,
-              child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2.5),
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              'داوي',
+              textDirection: TextDirection.rtl,
+              style: GoogleFonts.cairo(
+                color: Colors.white,
+                fontSize: 32,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ],
         ),

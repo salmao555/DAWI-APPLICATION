@@ -1,16 +1,19 @@
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/api_models.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/api_service.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/alive.dart';
 import '../ai/ai_assistant_screen.dart';
 import '../appointments/appointments_screen.dart';
 import '../documents/document_details_screen.dart';
 import '../documents/ocr_analysis_screen.dart';
 import '../medications/medications_screen.dart';
+import 'main_shell.dart';
 
 class _DashboardData {
   final List<ApiMedication> activeMedications;
@@ -82,29 +85,42 @@ class HomeDashboardScreenState extends State<HomeDashboardScreen> {
   void _showScanUploadSheet() {
     showModalBottomSheet(
       context: context,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.vertical(top: Radius.circular(20))),
       builder: (context) => SafeArea(
-        child: Wrap(children: [
-          ListTile(
-            leading: const Icon(Icons.photo_camera_outlined, color: AppColors.primary),
-            title: const Text('Scan document'),
-            onTap: () {
-              Navigator.pop(context);
-              _pickAndScan(ImageSource.camera);
-            },
-          ),
-          ListTile(
-            leading: const Icon(Icons.image_outlined, color: AppColors.primary),
-            title: const Text('Upload from gallery'),
-            onTap: () {
-              Navigator.pop(context);
-              _pickAndScan(ImageSource.gallery);
-            },
-          ),
-        ]),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.md, AppSpacing.md, AppSpacing.lg),
+          child: Column(mainAxisSize: MainAxisSize.min, children: [
+            Container(
+              width: 44,
+              height: 5,
+              decoration: BoxDecoration(color: AppColors.divider, borderRadius: BorderRadius.circular(3)),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            QuickActionTile(
+              icon: Icons.photo_camera_outlined,
+              label: 'Scan with camera',
+              colors: AppGradients.teal,
+              onTap: () {
+                Navigator.pop(context);
+                _pickAndScan(ImageSource.camera);
+              },
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            QuickActionTile(
+              icon: Icons.image_outlined,
+              label: 'Upload from gallery',
+              colors: AppGradients.lilac,
+              onTap: () {
+                Navigator.pop(context);
+                _pickAndScan(ImageSource.gallery);
+              },
+            ),
+          ]),
+        ),
       ),
     );
   }
+
+  void _push(Widget screen) => Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
 
   @override
   Widget build(BuildContext context) {
@@ -112,140 +128,67 @@ class HomeDashboardScreenState extends State<HomeDashboardScreen> {
     final firstName = user?.firstName.isNotEmpty == true ? user!.firstName : 'there';
     final hour = DateTime.now().hour;
     final greeting = hour < 12 ? 'Good morning' : (hour < 18 ? 'Good afternoon' : 'Good evening');
+    final initial = firstName.isNotEmpty ? firstName[0].toUpperCase() : '?';
 
-    return Scaffold(
-      body: SafeArea(
-        child: Stack(children: [
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.light,
+      child: Scaffold(
+        backgroundColor: Colors.transparent, // shell paints the gradient
+        body: Stack(children: [
           RefreshIndicator(
             onRefresh: () async => refresh(),
             child: SingleChildScrollView(
               physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.lg, AppSpacing.lg, AppSpacing.xl),
               child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  Text('$greeting, $firstName', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
-                  const SizedBox(height: AppSpacing.lg),
-                  FutureBuilder<_DashboardData>(
-                    future: _future,
-                    builder: (context, snapshot) {
-                      if (snapshot.connectionState == ConnectionState.waiting) {
-                        return const Padding(
-                          padding: EdgeInsets.symmetric(vertical: AppSpacing.xl),
-                          child: Center(child: CircularProgressIndicator()),
-                        );
-                      }
-                      if (snapshot.hasError) {
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
-                          child: Text("Couldn't load your dashboard.\n${snapshot.error}",
-                              style: const TextStyle(color: AppColors.textSecondary)),
-                        );
-                      }
-                      final data = snapshot.data!;
-                      return Column(
+                  _Header(
+                    firstName: firstName,
+                    subtitle: '$greeting · How are you feeling today?',
+                    initial: initial,
+                    onAvatarTap: () => MainShell.of(context)?.goToTab(4),
+                  ),
+                  // Content sheet (transparent over the gradient), pulled up by _sheetOverlap.
+                  // Bottom padding includes the floating nav bar's height (from MediaQuery).
+                  Transform.translate(
+                    offset: const Offset(0, -_sheetOverlap),
+                    child: Container(
+                      padding: EdgeInsets.fromLTRB(
+                        AppSpacing.lg,
+                        AppSpacing.lg,
+                        AppSpacing.lg,
+                        AppSpacing.xl + MediaQuery.paddingOf(context).bottom,
+                      ),
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // Health overview cards
-                          Row(children: [
-                            Expanded(child: _OverviewCard(icon: Icons.medication_outlined, label: 'Active treatments', value: '${data.activeMedications.length}')),
-                            const SizedBox(width: AppSpacing.sm),
-                            Expanded(child: _OverviewCard(icon: Icons.event_outlined, label: 'Upcoming appointments', value: '${data.upcomingAppointments.length}')),
-                          ]),
-                          const SizedBox(height: AppSpacing.sm),
-                          Row(children: [
-                            Expanded(child: _OverviewCard(icon: Icons.description_outlined, label: 'Recent documents', value: '${data.recentDocuments.length}')),
-                            const SizedBox(width: AppSpacing.sm),
-                            Expanded(child: _OverviewCard(icon: Icons.science_outlined, label: 'Recent analyses', value: '—')),
-                          ]),
+                          FadeSlideIn(
+                            index: 0,
+                            child: _AskBar(onTap: () => _push(const AiAssistantScreen())),
+                          ),
                           const SizedBox(height: AppSpacing.lg),
-
-                          // Health alerts (only from validated data)
-                          if (data.upcomingAppointments.isNotEmpty) ...[
-                            _AlertBanner(
-                              text: 'Your ${data.upcomingAppointments.first.specialty.isEmpty ? 'appointment' : data.upcomingAppointments.first.specialty} '
-                                  'is on ${data.upcomingAppointments.first.date} at ${data.upcomingAppointments.first.time}.',
-                            ),
-                            const SizedBox(height: AppSpacing.lg),
-                          ],
-
-                          // Quick actions
-                          const Text('Quick actions', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
-                          const SizedBox(height: AppSpacing.sm),
-                          Wrap(spacing: AppSpacing.sm, runSpacing: AppSpacing.sm, children: [
-                            _QuickAction(icon: Icons.photo_camera_outlined, label: 'Scan document', onTap: _isUploading ? null : _showScanUploadSheet),
-                            _QuickAction(
-                              icon: Icons.smart_toy_outlined,
-                              label: 'Ask AI',
-                              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AiAssistantScreen())),
-                            ),
-                            _QuickAction(
-                              icon: Icons.medication_outlined,
-                              label: 'Add medication',
-                              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MedicationsScreen())),
-                            ),
-                            _QuickAction(
-                              icon: Icons.event_outlined,
-                              label: 'Add appointment',
-                              onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AppointmentsScreen())),
-                            ),
-                          ]),
-                          const SizedBox(height: AppSpacing.lg),
-
-                          // Today's reminders (derived from active meds / upcoming appts)
-                          const Text("Today's reminders", style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
-                          const SizedBox(height: AppSpacing.sm),
-                          if (data.activeMedications.isEmpty && data.upcomingAppointments.isEmpty)
-                            const Text('Nothing scheduled for today.', style: TextStyle(color: AppColors.textSecondary))
-                          else ...[
-                            ...data.activeMedications.take(3).map((m) => _ReminderTile(
-                                  icon: Icons.medication_outlined,
-                                  title: m.name,
-                                  subtitle: '${m.timing} · ${m.frequency}',
-                                )),
-                            ...data.upcomingAppointments.take(2).map((a) => _ReminderTile(
-                                  icon: Icons.event_outlined,
-                                  title: a.specialty.isEmpty ? 'Appointment' : a.specialty,
-                                  subtitle: '${a.date} ${a.time}',
-                                )),
-                          ],
-                          const SizedBox(height: AppSpacing.lg),
-
-                          // Recent activity (recent documents)
-                          const Text('Recent activity', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
-                          const SizedBox(height: AppSpacing.sm),
-                          if (data.recentDocuments.isEmpty)
-                            const Text('No recent activity yet — scan your first document to get started.',
-                                style: TextStyle(color: AppColors.textSecondary))
-                          else
-                            ...data.recentDocuments.map((d) => InkWell(
-                                  borderRadius: BorderRadius.circular(14),
-                                  onTap: () => Navigator.push(
-                                    context,
-                                    MaterialPageRoute(builder: (_) => DocumentDetailsScreen(documentId: d.id)),
-                                  ),
-                                  child: Container(
-                                    margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-                                    padding: const EdgeInsets.all(AppSpacing.md),
-                                    decoration: BoxDecoration(
-                                        color: Colors.white, borderRadius: BorderRadius.circular(14), border: Border.all(color: AppColors.divider)),
-                                    child: Row(children: [
-                                      const Icon(Icons.description_outlined, color: AppColors.primary, size: 20),
-                                      const SizedBox(width: AppSpacing.sm),
-                                      Expanded(
-                                        child: Text(
-                                          d.aiSummary.isNotEmpty ? d.aiSummary : '${d.documentType} added',
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
-                                          style: const TextStyle(fontSize: 13),
-                                        ),
-                                      ),
-                                    ]),
-                                  ),
-                                )),
+                          FutureBuilder<_DashboardData>(
+                            future: _future,
+                            builder: (context, snapshot) {
+                              if (snapshot.connectionState == ConnectionState.waiting) {
+                                return const Padding(
+                                  padding: EdgeInsets.symmetric(vertical: AppSpacing.xl),
+                                  child: Center(child: CircularProgressIndicator()),
+                                );
+                              }
+                              if (snapshot.hasError) {
+                                return Padding(
+                                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                                  child: Text("Couldn't load your dashboard.\n${snapshot.error}",
+                                      style: const TextStyle(color: AppColors.textSecondary)),
+                                );
+                              }
+                              return _buildContent(snapshot.data!);
+                            },
+                          ),
                         ],
-                      );
-                    },
+                      ),
+                    ),
                   ),
                 ],
               ),
@@ -253,7 +196,7 @@ class HomeDashboardScreenState extends State<HomeDashboardScreen> {
           ),
           if (_isUploading)
             Container(
-              color: Colors.black.withOpacity(0.35),
+              color: Colors.black.withValues(alpha: 0.35),
               child: const Center(
                 child: Card(
                   child: Padding(
@@ -271,82 +214,326 @@ class HomeDashboardScreenState extends State<HomeDashboardScreen> {
       ),
     );
   }
+
+  Widget _buildContent(_DashboardData data) {
+    final quickActions = [
+      (Icons.document_scanner_outlined, 'Scan document', _isUploading ? null : _showScanUploadSheet),
+      (Icons.auto_awesome_outlined, 'Ask AI', () => _push(const AiAssistantScreen())),
+      (Icons.medication_outlined, 'Medications', () => _push(const MedicationsScreen())),
+      (Icons.event_outlined, 'Appointments', () => _push(const AppointmentsScreen())),
+    ];
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Health overview: three compact stat cards
+        FadeSlideIn(
+          index: 1,
+          child: IntrinsicHeight(
+            child: Row(crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+              Expanded(
+                child: StatCard(
+                  icon: Icons.medication_outlined,
+                  label: 'Treatments',
+                  value: '${data.activeMedications.length}',
+                  colors: _cardFill,
+                  onTap: () => _push(const MedicationsScreen()),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: StatCard(
+                  icon: Icons.event_outlined,
+                  label: 'Appointments',
+                  value: '${data.upcomingAppointments.length}',
+                  colors: _cardFill,
+                  onTap: () => _push(const AppointmentsScreen()),
+                ),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: StatCard(
+                  icon: Icons.description_outlined,
+                  label: 'Documents',
+                  value: '${data.recentDocuments.length}',
+                  colors: _cardFill,
+                  onTap: () => MainShell.of(context)?.goToTab(1),
+                ),
+              ),
+            ]),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.lg),
+
+        // Health alerts (only from validated data)
+        if (data.upcomingAppointments.isNotEmpty) ...[
+          FadeSlideIn(
+            index: 2,
+            child: _AlertBanner(
+              text: 'Your ${data.upcomingAppointments.first.specialty.isEmpty ? 'appointment' : data.upcomingAppointments.first.specialty} '
+                  'is on ${data.upcomingAppointments.first.date} at ${data.upcomingAppointments.first.time}.',
+            ),
+          ),
+          const SizedBox(height: AppSpacing.lg),
+        ],
+
+        // Quick actions: four equal outlined-icon tiles
+        const _SectionTitle('Categories'),
+        const SizedBox(height: AppSpacing.md),
+        FadeSlideIn(
+          index: 3,
+          child: Row(crossAxisAlignment: CrossAxisAlignment.start, children: [
+            for (final (icon, label, onTap) in quickActions)
+              Expanded(child: _QuickAction(icon: icon, label: label, onTap: onTap)),
+          ]),
+        ),
+        const SizedBox(height: AppSpacing.md),
+
+        // Today's reminders (derived from active meds / upcoming appts)
+        const _SectionTitle("Today's reminders"),
+        const SizedBox(height: AppSpacing.md),
+        if (data.activeMedications.isEmpty && data.upcomingAppointments.isEmpty)
+          const Text('Nothing scheduled for today.', style: TextStyle(color: AppColors.textSecondary))
+        else ...[
+          ...data.activeMedications.take(3).map((m) => _ReminderTile(
+                icon: Icons.medication_outlined,
+                title: m.name,
+                subtitle: '${m.timing} · ${m.frequency}',
+              )),
+          ...data.upcomingAppointments.take(2).map((a) => _ReminderTile(
+                icon: Icons.event_outlined,
+                title: a.specialty.isEmpty ? 'Appointment' : a.specialty,
+                subtitle: '${a.date} ${a.time}',
+              )),
+        ],
+        const SizedBox(height: AppSpacing.lg),
+
+        // Recent activity (recent documents)
+        const _SectionTitle('Recent activity'),
+        const SizedBox(height: AppSpacing.md),
+        if (data.recentDocuments.isEmpty)
+          const Text('No recent activity yet — scan your first document to get started.',
+              style: TextStyle(color: AppColors.textSecondary))
+        else
+          ...data.recentDocuments.map((d) => _ReminderTile(
+                icon: Icons.description_outlined,
+                title: d.documentType.isNotEmpty ? d.documentType : 'Document',
+                subtitle: d.aiSummary.isNotEmpty ? d.aiSummary : '${d.documentType} added',
+                maxSubtitleLines: 2,
+                onTap: () => _push(DocumentDetailsScreen(documentId: d.id)),
+              )),
+      ],
+    );
+  }
 }
 
-class _OverviewCard extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final String value;
-  const _OverviewCard({required this.icon, required this.label, required this.value});
+/// Stat card fill: same dark as the floating nav pill (StatCard switches to light text/icons).
+const List<Color> _cardFill = [AppColors.navDark, AppColors.navDark];
+
+/// How far the content sheet slides up over the teal header.
+const double _sheetOverlap = 24;
+
+/// Full-width teal header: welcome text, mint subtitle, avatar.
+class _Header extends StatelessWidget {
+  final String firstName;
+  final String subtitle;
+  final String initial;
+  final VoidCallback onAvatarTap;
+  const _Header({required this.firstName, required this.subtitle, required this.initial, required this.onAvatarTap});
+
   @override
   Widget build(BuildContext context) => Container(
-        padding: const EdgeInsets.all(AppSpacing.md),
-        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: AppColors.divider)),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Icon(icon, color: AppColors.primary, size: 20),
-          const SizedBox(height: 8),
-          Text(value, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
-          Text(label, style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary)),
-        ]),
-      );
-}
-
-class _QuickAction extends StatelessWidget {
-  final IconData icon;
-  final String label;
-  final VoidCallback? onTap;
-  const _QuickAction({required this.icon, required this.label, required this.onTap});
-  @override
-  Widget build(BuildContext context) => InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
-        child: Container(
-          width: 100,
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.md, horizontal: AppSpacing.sm),
-          decoration: BoxDecoration(color: AppColors.primaryLight, borderRadius: BorderRadius.circular(16)),
-          child: Column(children: [
-            Icon(icon, color: AppColors.primary),
-            const SizedBox(height: 6),
-            Text(label, textAlign: TextAlign.center, style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w600, color: AppColors.primary)),
+        decoration: const BoxDecoration(
+          color: AppColors.primary,
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(32)),
+        ),
+        padding: EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          MediaQuery.paddingOf(context).top + AppSpacing.lg,
+          AppSpacing.lg,
+          AppSpacing.xl + _sheetOverlap,
+        ),
+        child: FadeSlideIn(
+          child: Row(children: [
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text('Welcome, $firstName!',
+                    style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w700, height: 1.2)),
+                const SizedBox(height: 4),
+                Text(subtitle, style: const TextStyle(color: AppColors.mint, fontSize: 13.5)),
+              ]),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            PressableScale(
+              onTap: onAvatarTap,
+              borderRadius: 26,
+              child: Container(
+                width: 52,
+                height: 52,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Colors.white,
+                  border: Border.all(color: AppColors.mint, width: 3),
+                ),
+                child: Text(initial,
+                    style: const TextStyle(color: AppColors.deepTeal, fontSize: 20, fontWeight: FontWeight.w700)),
+              ),
+            ),
           ]),
         ),
       );
 }
 
+/// Search-style pill that opens the AI assistant.
+class _AskBar extends StatelessWidget {
+  final VoidCallback onTap;
+  const _AskBar({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) => PressableScale(
+        onTap: onTap,
+        borderRadius: AppRadius.button,
+        scale: 0.98,
+        hoverScale: 1.02,
+        child: Container(
+          height: 54,
+          padding: const EdgeInsets.only(left: 18, right: 6),
+          decoration: BoxDecoration(
+            color: AppColors.chipBackground,
+            border: Border.all(color: AppColors.divider),
+            borderRadius: BorderRadius.circular(AppRadius.button),
+          ),
+          child: Row(children: [
+            const Icon(Icons.search_rounded, color: AppColors.textSecondary),
+            const SizedBox(width: 10),
+            const Expanded(
+              child: Text('Ask DAWI anything...', style: TextStyle(color: AppColors.textSecondary, fontSize: 14)),
+            ),
+            Container(
+              width: 42,
+              height: 42,
+              decoration: const BoxDecoration(color: AppColors.primary, shape: BoxShape.circle),
+              child: const Icon(Icons.auto_awesome_rounded, color: Colors.white, size: 20),
+            ),
+          ]),
+        ),
+      );
+}
+
+/// 64x64 translucent rounded tile with an outlined teal icon, label below.
+class _QuickAction extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final VoidCallback? onTap;
+  const _QuickAction({required this.icon, required this.label, this.onTap});
+
+  @override
+  Widget build(BuildContext context) => Column(children: [
+        PressableScale(
+          onTap: onTap,
+          borderRadius: 20,
+          child: Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.7),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Icon(icon, color: AppColors.primary, size: 28),
+          ),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Text(
+          label,
+          textAlign: TextAlign.center,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: const TextStyle(fontSize: 12, height: 1.3, color: AppColors.textPrimary),
+        ),
+      ]);
+}
+
+class _SectionTitle extends StatelessWidget {
+  final String text;
+  const _SectionTitle(this.text);
+  @override
+  Widget build(BuildContext context) =>
+      Text(text, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 17, color: AppColors.textPrimary));
+}
+
+/// White soft-shadow row used for reminders and recent documents.
 class _ReminderTile extends StatelessWidget {
   final IconData icon;
   final String title;
   final String subtitle;
-  const _ReminderTile({required this.icon, required this.title, required this.subtitle});
+  final int maxSubtitleLines;
+  final VoidCallback? onTap;
+  const _ReminderTile({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    this.maxSubtitleLines = 1,
+    this.onTap,
+  });
+
   @override
-  Widget build(BuildContext context) => Container(
-        margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-        padding: const EdgeInsets.all(AppSpacing.md),
-        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14), border: Border.all(color: AppColors.divider)),
-        child: Row(children: [
-          Icon(icon, color: AppColors.primary, size: 18),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(
-            child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5)),
-              Text(subtitle, style: const TextStyle(fontSize: 11.5, color: AppColors.textSecondary)),
+  Widget build(BuildContext context) => Padding(
+        padding: const EdgeInsets.only(bottom: AppSpacing.md),
+        child: PressableScale(
+          onTap: onTap,
+          borderRadius: AppRadius.card,
+          scale: 0.97,
+          hoverScale: 1.02,
+          shadows: AppShadows.soft,
+          child: Container(
+            color: AppColors.cardBackground,
+            padding: const EdgeInsets.all(AppSpacing.md),
+            child: Row(children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: const BoxDecoration(color: AppColors.mint, shape: BoxShape.circle),
+                child: Icon(icon, color: AppColors.teal, size: 22),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                  Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14.5)),
+                  const SizedBox(height: 2),
+                  Text(subtitle,
+                      maxLines: maxSubtitleLines,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 12.5, color: AppColors.textSecondary)),
+                ]),
+              ),
+              if (onTap != null) const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
             ]),
           ),
-        ]),
+        ),
       );
 }
 
+/// Amber banner for the next appointment (the only non-teal accent).
 class _AlertBanner extends StatelessWidget {
   final String text;
   const _AlertBanner({required this.text});
   @override
-  Widget build(BuildContext context) => Container(
+  Widget build(BuildContext context) => GradientCard(
+        colors: const [AppColors.alertAmber, AppColors.alertAmber],
+        radius: AppRadius.card,
         padding: const EdgeInsets.all(AppSpacing.md),
-        decoration: BoxDecoration(color: const Color(0xFFFFF3E0), borderRadius: BorderRadius.circular(14)),
         child: Row(children: [
-          const Icon(Icons.notifications_active_outlined, color: Color(0xFFE7A23B), size: 20),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(child: Text(text, style: const TextStyle(fontSize: 13, height: 1.4))),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.6), shape: BoxShape.circle),
+            child: const Icon(Icons.notifications_active_outlined, color: AppColors.textPrimary, size: 20),
+          ),
+          const SizedBox(width: AppSpacing.md),
+          Expanded(
+            child: Text(text,
+                style: const TextStyle(fontSize: 13.5, height: 1.4, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
+          ),
         ]),
       );
 }

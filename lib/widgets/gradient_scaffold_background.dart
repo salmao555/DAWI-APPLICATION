@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
 import '../theme/app_theme.dart';
 
-/// Soft mint-to-white gradient backdrop used behind chat / mockup style
-/// screens, matching the reference designs.
+/// Soft mint-to-cream gradient backdrop used behind the main screens.
 class GradientScaffoldBackground extends StatelessWidget {
   final Widget child;
   const GradientScaffoldBackground({super.key, required this.child});
@@ -14,7 +13,7 @@ class GradientScaffoldBackground extends StatelessWidget {
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
-          colors: [AppColors.mintBackground, AppColors.scaffoldBackground],
+          colors: [AppColors.backgroundTop, AppColors.backgroundBottom],
         ),
       ),
       child: child,

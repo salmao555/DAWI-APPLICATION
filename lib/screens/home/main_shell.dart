@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../theme/app_theme.dart';
+import '../../widgets/alive.dart';
+import '../../widgets/gradient_scaffold_background.dart';
 import '../ai/ai_assistant_screen.dart';
 import '../documents/documents_screen.dart';
 import '../health/medical_record_screen.dart';
@@ -24,32 +26,110 @@ class _MainShellState extends State<MainShell> {
 
   void goToTab(int index) => setState(() => _index = index);
 
+  static const _items = [
+    (Icons.home_outlined, Icons.home_rounded, 'Home'),
+    (Icons.folder_outlined, Icons.folder_rounded, 'Documents'),
+    (Icons.favorite_outline_rounded, Icons.favorite_rounded, 'Health'),
+    (Icons.auto_awesome_outlined, Icons.auto_awesome_rounded, 'Assistant'),
+    (Icons.person_outline_rounded, Icons.person_rounded, 'Profile'),
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: IndexedStack(
-        index: _index,
-        children: const [
-          HomeDashboardScreen(),
-          DocumentsScreen(),
-          MedicalRecordScreen(),
-          AiAssistantScreen(),
-          ProfileScreen(),
-        ],
+      // Body extends behind the floating bar; Scaffold adds the bar's height
+      // to the body's bottom MediaQuery padding, so SafeArea/lists and FABs
+      // in the tabs stay clear of it.
+      extendBody: true,
+      body: GradientScaffoldBackground(
+        // Tab scaffolds go transparent so the shared gradient shows through.
+        child: Theme(
+          data: Theme.of(context).copyWith(scaffoldBackgroundColor: Colors.transparent),
+          child: IndexedStack(
+            index: _index,
+            children: const [
+              HomeDashboardScreen(),
+              DocumentsScreen(),
+              MedicalRecordScreen(),
+              AiAssistantScreen(),
+              ProfileScreen(),
+            ],
+          ),
+        ),
       ),
-      bottomNavigationBar: NavigationBar(
-        selectedIndex: _index,
-        onDestinationSelected: goToTab,
-        backgroundColor: Colors.white,
-        indicatorColor: AppColors.primaryLight,
-        destinations: const [
-          NavigationDestination(icon: Icon(Icons.home_outlined), selectedIcon: Icon(Icons.home, color: AppColors.primary), label: 'Home'),
-          NavigationDestination(icon: Icon(Icons.folder_outlined), selectedIcon: Icon(Icons.folder, color: AppColors.primary), label: 'Documents'),
-          NavigationDestination(icon: Icon(Icons.favorite_outline), selectedIcon: Icon(Icons.favorite, color: AppColors.primary), label: 'Health'),
-          NavigationDestination(icon: Icon(Icons.smart_toy_outlined), selectedIcon: Icon(Icons.smart_toy, color: AppColors.primary), label: 'Assistant'),
-          NavigationDestination(icon: Icon(Icons.person_outline), selectedIcon: Icon(Icons.person, color: AppColors.primary), label: 'Profile'),
-        ],
+      bottomNavigationBar: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
+          child: Container(
+            height: 64,
+            padding: const EdgeInsets.symmetric(horizontal: 8),
+            decoration: BoxDecoration(
+              color: AppColors.navDark,
+              borderRadius: BorderRadius.circular(32),
+              boxShadow: const [BoxShadow(color: Color(0x3314211F), blurRadius: 24, offset: Offset(0, 10))],
+            ),
+            child: Row(children: [
+              for (var i = 0; i < _items.length; i++)
+                Expanded(
+                  child: _NavItem(
+                    icon: _items[i].$1,
+                    selectedIcon: _items[i].$2,
+                    label: _items[i].$3,
+                    selected: i == _index,
+                    onTap: () => goToTab(i),
+                  ),
+                ),
+            ]),
+          ),
+        ),
       ),
     );
   }
+}
+
+/// Icon-only nav button: white circle with teal icon when selected.
+class _NavItem extends StatelessWidget {
+  final IconData icon;
+  final IconData selectedIcon;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  const _NavItem({
+    required this.icon,
+    required this.selectedIcon,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) => Semantics(
+        label: label,
+        selected: selected,
+        button: true,
+        child: Tooltip(
+          message: label,
+          child: Center(
+            child: PressableScale(
+              onTap: onTap,
+              borderRadius: 24,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                curve: Curves.easeOut,
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: selected ? Colors.white : Colors.transparent,
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  selected ? selectedIcon : icon,
+                  color: selected ? AppColors.primary : Colors.white.withValues(alpha: 0.6),
+                  size: 24,
+                ),
+              ),
+            ),
+          ),
+        ),
+      );
 }

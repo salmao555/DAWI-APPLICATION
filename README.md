@@ -111,6 +111,19 @@ flutter run
 ### Running the backend
 See the `backend/` directory for FastAPI/Django-specific setup instructions.
 
+### Run with Docker
+Runs the API and the Flutter web app together:
+
+```bash
+flutter build web --release
+docker compose up --build
+```
+
+- App: http://localhost:8080
+- API: http://localhost:8000 (docs at http://localhost:8000/docs)
+
+Secrets such as `JWT_SECRET` and the AI API key are read from `backend/.env` if it exists. The SQLite database is stored in `./data` and uploaded files in `./uploads`, so both persist across restarts. After changing Flutter code, run `flutter build web --release` again and reload the page.
+
 ## Status
 
 Actively developed as part of an ongoing personal healthtech project.
