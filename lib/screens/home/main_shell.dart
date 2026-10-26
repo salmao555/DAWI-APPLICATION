@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/alive.dart';
 import '../../widgets/gradient_scaffold_background.dart';
@@ -26,16 +27,16 @@ class _MainShellState extends State<MainShell> {
 
   void goToTab(int index) => setState(() => _index = index);
 
-  static const _items = [
-    (Icons.home_outlined, Icons.home_rounded, 'Home'),
-    (Icons.folder_outlined, Icons.folder_rounded, 'Documents'),
-    (Icons.favorite_outline_rounded, Icons.favorite_rounded, 'Health'),
-    (Icons.auto_awesome_outlined, Icons.auto_awesome_rounded, 'Assistant'),
-    (Icons.person_outline_rounded, Icons.person_rounded, 'Profile'),
-  ];
-
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final items = [
+      (Icons.home_outlined, Icons.home_rounded, l10n.navHome),
+      (Icons.folder_outlined, Icons.folder_rounded, l10n.navDocuments),
+      (Icons.favorite_outline_rounded, Icons.favorite_rounded, l10n.navHealth),
+      (Icons.auto_awesome_outlined, Icons.auto_awesome_rounded, l10n.navAssistant),
+      (Icons.person_outline_rounded, Icons.person_rounded, l10n.navProfile),
+    ];
     return Scaffold(
       // Body extends behind the floating bar; Scaffold adds the bar's height
       // to the body's bottom MediaQuery padding, so SafeArea/lists and FABs
@@ -69,12 +70,12 @@ class _MainShellState extends State<MainShell> {
               boxShadow: const [BoxShadow(color: Color(0x33072D44), blurRadius: 24, offset: Offset(0, 10))],
             ),
             child: Row(children: [
-              for (var i = 0; i < _items.length; i++)
+              for (var i = 0; i < items.length; i++)
                 Expanded(
                   child: _NavItem(
-                    icon: _items[i].$1,
-                    selectedIcon: _items[i].$2,
-                    label: _items[i].$3,
+                    icon: items[i].$1,
+                    selectedIcon: items[i].$2,
+                    label: items[i].$3,
                     selected: i == _index,
                     onTap: () => goToTab(i),
                   ),

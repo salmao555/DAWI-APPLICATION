@@ -1,0 +1,19 @@
+{
+  "@@locale": "fr",
+  "navHome": "Accueil",
+  "navDocuments": "Documents",
+  "navHealth": "Santé",
+  "navAssistant": "Assistant",
+  "navProfile": "Profil",
+  "onboardingSkip": "Passer",
+  "onboardingNext": "Suivant",
+  "onboardingGetStarted": "Commencer",
+  "onboarding1Title": "Comprenez vos documents",
+  "onboarding1Body": "Scannez ou importez vos ordonnances, analyses et dossiers médicaux — nous vous aidons à les comprendre.",
+  "onboarding2Title": "Centralisez votre santé",
+  "onboarding2Body": "Documents, médicaments, rendez-vous et médecins, tout est organisé au même endroit.",
+  "onboarding3Title": "Assistant santé IA",
+  "onboarding3Body": "Posez vos questions simplement et obtenez des explications sur les termes médicaux et des résumés de vos informations validées.",
+  "onboarding4Title": "Rappels et suivi",
+  "onboarding4Body": "Ne manquez plus aucune prise ni aucun rendez-vous grâce à des rappels et des conseils de santé adaptés à vous."
+}

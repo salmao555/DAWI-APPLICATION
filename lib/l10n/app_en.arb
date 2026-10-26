@@ -1,0 +1,19 @@
+{
+  "@@locale": "en",
+  "navHome": "Home",
+  "navDocuments": "Documents",
+  "navHealth": "Health",
+  "navAssistant": "Assistant",
+  "navProfile": "Profile",
+  "onboardingSkip": "Skip",
+  "onboardingNext": "Next",
+  "onboardingGetStarted": "Get started",
+  "onboarding1Title": "Understand your documents",
+  "onboarding1Body": "Scan or import your prescriptions, lab reports, and medical records — we help you make sense of them.",
+  "onboarding2Title": "Centralize your health",
+  "onboarding2Body": "Documents, medications, appointments, and doctors, all organized in one place.",
+  "onboarding3Title": "AI Health Assistant",
+  "onboarding3Body": "Ask questions in plain language and get explanations of medical terms and summaries of your validated information.",
+  "onboarding4Title": "Reminders & Monitoring",
+  "onboarding4Body": "Never miss a dose or an appointment, with reminders and general health guidance tailored to you."
+}

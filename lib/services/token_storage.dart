@@ -6,6 +6,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 class TokenStorage {
   static const _tokenKey = 'auth_token';
   static const _onboardingSeenKey = 'onboarding_seen';
+  static const _localeKey = 'app_locale';
 
   final FlutterSecureStorage _storage = const FlutterSecureStorage();
 
@@ -18,6 +19,11 @@ class TokenStorage {
   Future<void> markOnboardingSeen() => _storage.write(key: _onboardingSeenKey, value: 'true');
 
   Future<bool> hasSeenOnboarding() async => (await _storage.read(key: _onboardingSeenKey)) == 'true';
+
+  /// App language chosen by the user ('en' / 'fr' / 'ar'), or null if never chosen.
+  Future<void> saveLocale(String languageCode) => _storage.write(key: _localeKey, value: languageCode);
+
+  Future<String?> readLocale() => _storage.read(key: _localeKey);
 }
 
 final TokenStorage tokenStorage = TokenStorage();

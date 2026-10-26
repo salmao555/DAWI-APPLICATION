@@ -1,38 +1,38 @@
 import 'package:flutter/material.dart';
 
 import '../../services/token_storage.dart';
+import '../../l10n/app_localizations.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/pill_background.dart';
 import '../auth/login_screen.dart';
 
 class _OnboardingPageData {
   final IconData icon;
-  final String title;
-  final String description;
+  final String Function(AppLocalizations) title;
+  final String Function(AppLocalizations) description;
   const _OnboardingPageData({required this.icon, required this.title, required this.description});
 }
 
-const _pages = [
+final _pages = [
   _OnboardingPageData(
     icon: Icons.document_scanner_outlined,
-    title: 'Understand your documents',
-    description:
-        'Scan or import your prescriptions, lab reports, and medical records — we help you make sense of them.',
+    title: (l) => l.onboarding1Title,
+    description: (l) => l.onboarding1Body,
   ),
   _OnboardingPageData(
     icon: Icons.folder_shared_outlined,
-    title: 'Centralize your health',
-    description: 'Documents, medications, appointments, and doctors, all organized in one place.',
+    title: (l) => l.onboarding2Title,
+    description: (l) => l.onboarding2Body,
   ),
   _OnboardingPageData(
     icon: Icons.smart_toy_outlined,
-    title: 'AI Health Assistant',
-    description: 'Ask questions in plain language and get explanations of medical terms and summaries of your validated information.',
+    title: (l) => l.onboarding3Title,
+    description: (l) => l.onboarding3Body,
   ),
   _OnboardingPageData(
     icon: Icons.notifications_active_outlined,
-    title: 'Reminders & Monitoring',
-    description: 'Never miss a dose or an appointment, with reminders and general health guidance tailored to you.',
+    title: (l) => l.onboarding4Title,
+    description: (l) => l.onboarding4Body,
   ),
 ];
 
@@ -71,6 +71,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final isLast = _index == _pages.length - 1;
+    final l10n = AppLocalizations.of(context);
 
     return Scaffold(
       backgroundColor: AppColors.primary,
@@ -83,13 +84,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
               SafeArea(
                 bottom: false,
                 child: Align(
-                  alignment: Alignment.topRight,
+                  alignment: AlignmentDirectional.topEnd,
                   child: Padding(
                     padding: const EdgeInsets.all(AppSpacing.sm),
                     child: TextButton(
                       onPressed: _finish,
                       style: TextButton.styleFrom(foregroundColor: Colors.white),
-                      child: const Text('Skip'),
+                      child: Text(l10n.onboardingSkip),
                     ),
                   ),
                 ),
@@ -132,7 +133,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       }),
                     ),
                     const SizedBox(height: AppSpacing.lg),
-                    ElevatedButton(onPressed: _next, child: Text(isLast ? 'Get started' : 'Next')),
+                    ElevatedButton(onPressed: _next, child: Text(isLast ? l10n.onboardingGetStarted : l10n.onboardingNext)),
                   ],
                 ),
               ),
@@ -177,18 +178,18 @@ class _OnboardingPage extends StatelessWidget {
         child: Column(
           children: [
             Text(
-              page.title,
+              page.title(AppLocalizations.of(context)),
               textAlign: TextAlign.center,
               style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
             ),
             const SizedBox(height: AppSpacing.sm),
-            // Fixed 4-line slot so the sheet doesn't jump between pages.
+            // Fixed 5-line slot (French and Arabic run longer) so the sheet doesn't jump between pages.
             SizedBox(
-              height: 88,
+              height: 110,
               child: Text(
-                page.description,
+                page.description(AppLocalizations.of(context)),
                 textAlign: TextAlign.center,
-                maxLines: 4,
+                maxLines: 5,
                 overflow: TextOverflow.ellipsis,
                 style: const TextStyle(color: AppColors.textSecondary, fontSize: 14.5, height: 1.5),
               ),
