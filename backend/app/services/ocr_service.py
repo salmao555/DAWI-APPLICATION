@@ -38,7 +38,7 @@ def _extract_from_image(image_path: str) -> str:
     processed = _preprocess(image)
 
     try:
-        text = pytesseract.image_to_string(processed)
+        text = pytesseract.image_to_string(processed, lang="fra+eng")
     except pytesseract.TesseractNotFoundError as exc:
         raise RuntimeError(
             "Tesseract OCR engine not found. Install it "

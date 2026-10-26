@@ -6,6 +6,7 @@ import '../../models/api_models.dart';
 import '../../models/medication.dart';
 import '../../services/api_service.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/alive.dart';
 import '../../widgets/medication_card.dart';
 import '../ai/ai_assistant_screen.dart';
 import '../ai/ai_explanation_screen.dart';
@@ -102,10 +103,7 @@ class _DocumentDetailsScreenState extends State<DocumentDetailsScreen> {
                               )),
                     ),
                   const SizedBox(height: AppSpacing.md),
-                  Container(
-                    padding: const EdgeInsets.all(AppSpacing.md),
-                    decoration: BoxDecoration(
-                        color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: AppColors.divider)),
+                  AppPanel(
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
                       _DetailRow(icon: Icons.description_outlined, label: 'Type', value: DocumentTypes.label(d.documentType)),
                       const SizedBox(height: 10),
@@ -134,6 +132,7 @@ class _DocumentDetailsScreenState extends State<DocumentDetailsScreen> {
                       child: OutlinedButton.icon(
                         icon: const Icon(Icons.auto_awesome_outlined, size: 18),
                         label: const Text('AI Explanation'),
+                        style: AppButtons.dark,
                         onPressed: () => Navigator.push(
                           context,
                           MaterialPageRoute(builder: (_) => AiExplanationScreen(document: d)),
@@ -145,6 +144,7 @@ class _DocumentDetailsScreenState extends State<DocumentDetailsScreen> {
                       child: OutlinedButton.icon(
                         icon: const Icon(Icons.smart_toy_outlined, size: 18),
                         label: const Text('Ask AI'),
+                        style: AppButtons.dark,
                         onPressed: () => Navigator.push(
                           context,
                           MaterialPageRoute(builder: (_) => AiAssistantScreen(documentId: d.id)),
@@ -154,7 +154,7 @@ class _DocumentDetailsScreenState extends State<DocumentDetailsScreen> {
                   ]),
                   if (medications.isNotEmpty) ...[
                     const SizedBox(height: AppSpacing.lg),
-                    const Text('Medications', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+                    const SectionTitle('Medications'),
                     const SizedBox(height: AppSpacing.md),
                     ...medications.map((m) => MedicationCard(medication: m)),
                   ],

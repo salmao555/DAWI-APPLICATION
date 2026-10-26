@@ -64,7 +64,7 @@ class _MainShellState extends State<MainShell> {
             height: 64,
             padding: const EdgeInsets.symmetric(horizontal: 8),
             decoration: BoxDecoration(
-              color: AppColors.navDark,
+              color: AppColors.darkCard,
               borderRadius: BorderRadius.circular(32),
               boxShadow: const [BoxShadow(color: Color(0x3314211F), blurRadius: 24, offset: Offset(0, 10))],
             ),

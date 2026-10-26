@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../models/api_models.dart';
 import '../../services/api_service.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/alive.dart';
 import '../ai/ai_assistant_screen.dart';
 import '../appointments/appointments_screen.dart';
 import '../medications/medications_screen.dart';
@@ -68,7 +69,7 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
                     child: OutlinedButton.icon(
                       icon: const Icon(Icons.medication_outlined, size: 18),
                       label: const Text('Medications'),
-                      style: _darkButtonStyle,
+                      style: AppButtons.dark,
                       onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MedicationsScreen())),
                     ),
                   ),
@@ -77,7 +78,7 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
                     child: OutlinedButton.icon(
                       icon: const Icon(Icons.event_outlined, size: 18),
                       label: const Text('Appointments'),
-                      style: _darkButtonStyle,
+                      style: AppButtons.dark,
                       onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AppointmentsScreen())),
                     ),
                   ),
@@ -86,14 +87,12 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Personal information', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+                    const SectionTitle('Personal information'),
                     TextButton(onPressed: () => _editHealthProfile(record.healthProfile), child: const Text('Edit')),
                   ],
                 ),
                 const SizedBox(height: AppSpacing.sm),
-                Container(
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: AppColors.divider)),
+                AppPanel(
                   child: record.healthProfile == null
                       ? const Text('No health profile added yet.', style: TextStyle(color: AppColors.textSecondary))
                       : Column(children: [
@@ -108,26 +107,28 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
                         ]),
                 ),
                 const SizedBox(height: AppSpacing.lg),
-                const Text('Active medications', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
-                const SizedBox(height: AppSpacing.sm),
+                const SectionTitle('Active medications'),
+                const SizedBox(height: AppSpacing.md),
                 if (record.activeMedications.isEmpty)
                   const Text('No active medications.', style: TextStyle(color: AppColors.textSecondary))
                 else
-                  ...record.activeMedications.map((m) => _ListLine(title: m.name, subtitle: '${m.dose} · ${m.frequency}')),
+                  ...record.activeMedications.map((m) => AppTile(icon: Icons.medication_outlined, title: m.name, subtitle: '${m.dose} · ${m.frequency}')),
                 const SizedBox(height: AppSpacing.lg),
-                const Text('Doctors', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
-                const SizedBox(height: AppSpacing.sm),
+                const SectionTitle('Doctors'),
+                const SizedBox(height: AppSpacing.md),
                 if (record.doctors.isEmpty)
                   const Text('No doctors added yet.', style: TextStyle(color: AppColors.textSecondary))
                 else
-                  ...record.doctors.map((d) => _ListLine(title: d.name, subtitle: d.specialty)),
+                  ...record.doctors.map((d) => AppTile(icon: Icons.badge_outlined, title: d.name, subtitle: d.specialty)),
                 const SizedBox(height: AppSpacing.lg),
-                const Text('Recent documents', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
-                const SizedBox(height: AppSpacing.sm),
+                const SectionTitle('Recent documents'),
+                const SizedBox(height: AppSpacing.md),
                 if (record.recentDocuments.isEmpty)
                   const Text('No documents yet.', style: TextStyle(color: AppColors.textSecondary))
                 else
-                  ...record.recentDocuments.map((d) => _ListLine(
+                  ...record.recentDocuments.map((d) => AppTile(
+                        icon: Icons.description_outlined,
+                        maxSubtitleLines: 2,
                         title: d.aiSummary.isNotEmpty ? d.aiSummary : d.documentType,
                         subtitle: d.documentDate.isNotEmpty ? 'Source: ${d.documentType} — ${d.documentDate}' : 'Source: ${d.documentType}',
                       )),
@@ -138,19 +139,12 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AiAssistantScreen())),
-        icon: const Icon(Icons.smart_toy_outlined),
+        icon: const Icon(Icons.smart_toy_outlined, color: AppColors.teal),
         label: const Text('Ask Assistant'),
       ),
     );
   }
 }
-
-/// Same dark as the floating nav pill, with light text/icon and no border.
-final ButtonStyle _darkButtonStyle = OutlinedButton.styleFrom(
-  backgroundColor: AppColors.navDark,
-  foregroundColor: Colors.white,
-  side: BorderSide.none,
-);
 
 class _InfoRow extends StatelessWidget {
   final String label;
@@ -162,22 +156,6 @@ class _InfoRow extends StatelessWidget {
         child: Row(children: [
           Expanded(child: Text(label, style: const TextStyle(color: AppColors.textSecondary))),
           Flexible(child: Text(value.isEmpty ? '—' : value, textAlign: TextAlign.right, style: const TextStyle(fontWeight: FontWeight.w600))),
-        ]),
-      );
-}
-
-class _ListLine extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  const _ListLine({required this.title, required this.subtitle});
-  @override
-  Widget build(BuildContext context) => Container(
-        margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-        padding: const EdgeInsets.all(AppSpacing.md),
-        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14), border: Border.all(color: AppColors.divider)),
-        child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-          Text(title, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 13.5)),
-          if (subtitle.isNotEmpty) Text(subtitle, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
         ]),
       );
 }

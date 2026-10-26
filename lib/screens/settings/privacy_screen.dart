@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/alive.dart';
 
 /// Privacy & Security page (spec section 26) — static explanatory content
 /// in plain language, plus action rows for consent/export/delete. The
@@ -39,10 +40,12 @@ class PrivacyScreen extends StatelessWidget {
               body: 'No. This app helps you organize and understand your health information, but it never diagnoses '
                   'conditions or replaces professional medical advice.',
             ),
-            const SizedBox(height: AppSpacing.lg),
-            _ActionTile(icon: Icons.download_outlined, title: 'Export my data', onTap: () => _notImplemented(context)),
-            _ActionTile(icon: Icons.delete_outline, title: 'Delete my documents', onTap: () => _notImplemented(context)),
-            _ActionTile(icon: Icons.person_remove_outlined, title: 'Delete my account', onTap: () => _notImplemented(context), destructive: true),
+            const SizedBox(height: AppSpacing.sm),
+            const SectionTitle('Your data'),
+            const SizedBox(height: AppSpacing.md),
+            AppTile(icon: Icons.download_outlined, title: 'Export my data', onTap: () => _notImplemented(context)),
+            AppTile(icon: Icons.delete_outline, title: 'Delete my documents', onTap: () => _notImplemented(context)),
+            AppTile(icon: Icons.person_remove_outlined, title: 'Delete my account', onTap: () => _notImplemented(context), destructive: true),
           ],
         ),
       ),
@@ -69,31 +72,4 @@ class _Section extends StatelessWidget {
           Text(body, style: const TextStyle(fontSize: 13.5, color: AppColors.textSecondary, height: 1.5)),
         ]),
       );
-}
-
-class _ActionTile extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final VoidCallback onTap;
-  final bool destructive;
-  const _ActionTile({required this.icon, required this.title, required this.onTap, this.destructive = false});
-  @override
-  Widget build(BuildContext context) {
-    final color = destructive ? Colors.redAccent : AppColors.primary;
-    return InkWell(
-      borderRadius: BorderRadius.circular(14),
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: AppSpacing.sm),
-        padding: const EdgeInsets.all(AppSpacing.md),
-        decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(14), border: Border.all(color: AppColors.divider)),
-        child: Row(children: [
-          Icon(icon, color: color, size: 20),
-          const SizedBox(width: AppSpacing.sm),
-          Expanded(child: Text(title, style: TextStyle(fontWeight: FontWeight.w600, color: destructive ? Colors.redAccent : AppColors.textPrimary))),
-          const Icon(Icons.chevron_right, color: AppColors.textSecondary),
-        ]),
-      ),
-    );
-  }
 }

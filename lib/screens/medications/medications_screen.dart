@@ -4,6 +4,7 @@ import '../../core/constants.dart';
 import '../../models/api_models.dart';
 import '../../services/api_service.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/alive.dart';
 import '../../widgets/empty_state.dart';
 import 'medication_details_screen.dart';
 
@@ -56,7 +57,7 @@ class MedicationsScreenState extends State<MedicationsScreen> with SingleTickerP
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _addMedication,
-        icon: const Icon(Icons.add),
+        icon: const Icon(Icons.add, color: AppColors.teal),
         label: const Text('Add medication'),
       ),
       body: SafeArea(
@@ -97,32 +98,18 @@ class _MedicationList extends StatelessWidget {
     if (medications.isEmpty) {
       return ListView(children: const [EmptyState(icon: Icons.medication_outlined, message: 'No medications here yet.')]);
     }
-    return ListView.separated(
+    return ListView.builder(
       padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.md, AppSpacing.md, 96),
       itemCount: medications.length,
-      separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
       itemBuilder: (context, i) {
         final m = medications[i];
-        return InkWell(
-          borderRadius: BorderRadius.circular(16),
+        return AppTile(
+          icon: Icons.medication_outlined,
+          title: m.name,
+          subtitle: '${m.dose} · ${m.frequency}',
           onTap: () => Navigator.push(
             context,
             MaterialPageRoute(builder: (_) => MedicationDetailsScreen(medicationId: m.id!)),
-          ),
-          child: Container(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            decoration:
-                BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: AppColors.divider)),
-            child: Row(children: [
-              Expanded(
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(m.name, style: const TextStyle(fontWeight: FontWeight.w700)),
-                  const SizedBox(height: 2),
-                  Text('${m.dose} · ${m.frequency}', style: const TextStyle(fontSize: 12.5, color: AppColors.textSecondary)),
-                ]),
-              ),
-              const Icon(Icons.chevron_right, color: AppColors.textSecondary),
-            ]),
           ),
         );
       },

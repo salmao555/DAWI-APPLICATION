@@ -22,7 +22,7 @@ class ApiService {
   /// the frontend README's troubleshooting section for details on each case.
   static String get _defaultBaseUrl {
     if (_dartDefineBaseUrl.isNotEmpty) return _dartDefineBaseUrl;
-    if (kIsWeb) return 'http://localhost:8000';
+    if (kIsWeb) return 'http://${Uri.base.host}:8000';
     try {
       if (Platform.isAndroid) return 'http://10.0.2.2:8000';
     } catch (_) {

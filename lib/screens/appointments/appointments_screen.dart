@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../models/api_models.dart';
 import '../../services/api_service.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/alive.dart';
 import '../../widgets/empty_state.dart';
 
 /// Appointments page (spec section 16): upcoming/past appointments with
@@ -41,7 +42,7 @@ class AppointmentsScreenState extends State<AppointmentsScreen> {
       appBar: AppBar(title: const Text('Appointments')),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _addAppointment,
-        icon: const Icon(Icons.add),
+        icon: const Icon(Icons.add, color: AppColors.teal),
         label: const Text('Add appointment'),
       ),
       body: SafeArea(
@@ -60,10 +61,9 @@ class AppointmentsScreenState extends State<AppointmentsScreen> {
               if (appointments.isEmpty) {
                 return ListView(children: const [EmptyState(icon: Icons.event_busy_outlined, message: 'No upcoming appointments.')]);
               }
-              return ListView.separated(
+              return ListView.builder(
                 padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.md, AppSpacing.md, 96),
                 itemCount: appointments.length,
-                separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
                 itemBuilder: (context, i) => _AppointmentCard(appointment: appointments[i]),
               );
             },
@@ -80,27 +80,13 @@ class _AppointmentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: AppColors.divider)),
-      child: Row(children: [
-        Container(
-          padding: const EdgeInsets.all(10),
-          decoration: BoxDecoration(color: AppColors.primaryLight, borderRadius: BorderRadius.circular(12)),
-          child: const Icon(Icons.event_outlined, color: AppColors.primary),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        Expanded(
-          child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-            Text(appointment.specialty.isEmpty ? 'Appointment' : appointment.specialty, style: const TextStyle(fontWeight: FontWeight.w700)),
-            const SizedBox(height: 2),
-            Text('${appointment.date} ${appointment.time}'.trim(), style: const TextStyle(fontSize: 12.5, color: AppColors.textSecondary)),
-            if (appointment.location.isNotEmpty)
-              Text(appointment.location, style: const TextStyle(fontSize: 12.5, color: AppColors.textSecondary)),
-          ]),
-        ),
-        _StatusBadge(status: appointment.status),
-      ]),
+    final when = '${appointment.date} ${appointment.time}'.trim();
+    return AppTile(
+      icon: Icons.event_outlined,
+      title: appointment.specialty.isEmpty ? 'Appointment' : appointment.specialty,
+      subtitle: appointment.location.isEmpty ? when : '$when\n${appointment.location}',
+      maxSubtitleLines: 2,
+      trailing: _StatusBadge(status: appointment.status),
     );
   }
 }
@@ -110,10 +96,14 @@ class _StatusBadge extends StatelessWidget {
   const _StatusBadge({required this.status});
   @override
   Widget build(BuildContext context) {
-    final color = status == 'completed' ? AppColors.success : (status == 'cancelled' ? Colors.redAccent : AppColors.primary);
+    final upcoming = status != 'completed' && status != 'cancelled';
+    final color = status == 'completed' ? AppColors.success : (status == 'cancelled' ? Colors.redAccent : AppColors.teal);
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(color: color.withOpacity(0.12), borderRadius: BorderRadius.circular(20)),
+      decoration: BoxDecoration(
+        color: upcoming ? AppColors.darkCard : color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(20),
+      ),
       child: Text(status, style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w600)),
     );
   }

@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/token_storage.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/pill_background.dart';
 import '../auth/login_screen.dart';
 import '../home/main_shell.dart';
 import '../onboarding/onboarding_screen.dart';
@@ -51,45 +52,34 @@ class _SplashScreenState extends State<SplashScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.deepTeal,
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Text(
-              'DAWI',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 56,
-                fontWeight: FontWeight.w800,
-                letterSpacing: 6,
-              ),
+      body: Stack(
+        children: [
+          const Positioned.fill(child: PillBackground(opacity: 0.1)),
+          Center(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'DAWI',
+                  style: TextStyle(color: Colors.white, fontSize: 56, fontWeight: FontWeight.w800, letterSpacing: 6),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                Container(
+                  width: 104,
+                  height: 104,
+                  decoration: const BoxDecoration(color: AppColors.mint, shape: BoxShape.circle),
+                  child: const Icon(Icons.health_and_safety_rounded, color: AppColors.deepTeal, size: 52),
+                ),
+                const SizedBox(height: AppSpacing.lg),
+                Text(
+                  'داوي',
+                  textDirection: TextDirection.rtl,
+                  style: GoogleFonts.cairo(color: Colors.white, fontSize: 32, fontWeight: FontWeight.w700),
+                ),
+              ],
             ),
-            const SizedBox(height: AppSpacing.lg),
-            Container(
-              width: 104,
-              height: 104,
-              decoration: const BoxDecoration(
-                color: AppColors.mint,
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.health_and_safety_rounded,
-                color: AppColors.deepTeal,
-                size: 52,
-              ),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            Text(
-              'داوي',
-              textDirection: TextDirection.rtl,
-              style: GoogleFonts.cairo(
-                color: Colors.white,
-                fontSize: 32,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

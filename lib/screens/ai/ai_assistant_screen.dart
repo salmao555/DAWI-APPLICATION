@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../services/api_service.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/alive.dart';
 import '../../widgets/gradient_scaffold_background.dart';
 
 const _suggestedQuestions = [
@@ -113,7 +114,7 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
                 padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.sm, AppSpacing.md, 0),
                 child: Row(children: [
                   const CircleAvatar(
-                      radius: 16, backgroundColor: AppColors.primaryLight, child: Icon(Icons.smart_toy_outlined, size: 18, color: AppColors.primary)),
+                      radius: 18, backgroundColor: AppColors.darkCard, child: Icon(Icons.smart_toy_outlined, size: 18, color: AppColors.teal)),
                   const SizedBox(width: AppSpacing.sm),
                   const Text('Health Assistant', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18)),
                 ]),
@@ -125,7 +126,12 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
                     spacing: 8,
                     runSpacing: 8,
                     children: _suggestedQuestions
-                        .map((q) => ActionChip(label: Text(q, style: const TextStyle(fontSize: 12)), onPressed: () => _send(q)))
+                        .map((q) => ActionChip(
+                              avatar: const Icon(Icons.auto_awesome_outlined, size: 16, color: AppColors.teal),
+                              backgroundColor: AppColors.cardBackground,
+                              label: Text(q, style: const TextStyle(fontSize: 12)),
+                              onPressed: () => _send(q),
+                            ))
                         .toList(),
                   ),
                 ),
@@ -158,7 +164,7 @@ class _MessageBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final align = message.isUser ? Alignment.centerRight : Alignment.centerLeft;
-    final bubbleColor = message.isUser ? AppColors.primary : Colors.white;
+    final bubbleColor = message.isUser ? AppColors.darkCard : AppColors.cardBackground;
     final textColor = message.isUser ? Colors.white : AppColors.textPrimary;
 
     return Align(
@@ -214,7 +220,20 @@ class _ChatInputBar extends StatelessWidget {
           ),
         ),
         const SizedBox(width: 8),
-        IconButton(icon: const Icon(Icons.send, color: AppColors.primary), onPressed: enabled ? onSend : null),
+        // Same teal send circle as the home "Ask DAWI" bar.
+        PressableScale(
+          onTap: enabled ? onSend : null,
+          borderRadius: 26,
+          child: Container(
+            width: 52,
+            height: 52,
+            decoration: BoxDecoration(
+              color: enabled ? AppColors.primary : AppColors.textSecondary,
+              shape: BoxShape.circle,
+            ),
+            child: const Icon(Icons.send_rounded, color: Colors.white, size: 22),
+          ),
+        ),
       ]),
     );
   }

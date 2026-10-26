@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/constants.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/alive.dart';
 
 /// Settings page (spec section 27). NOTE: the toggles here are local UI
 /// state for now — persisting them (and wiring notification toggles to
@@ -30,48 +31,66 @@ class _SettingsScreenState extends State<SettingsScreen> {
         child: ListView(
           padding: const EdgeInsets.all(AppSpacing.lg),
           children: [
-            _SectionHeader('Notifications'),
-            SwitchListTile(
-              value: _medicationReminders,
-              onChanged: (v) => setState(() => _medicationReminders = v),
-              title: const Text('Medication reminders'),
-            ),
-            SwitchListTile(
-              value: _appointmentReminders,
-              onChanged: (v) => setState(() => _appointmentReminders = v),
-              title: const Text('Appointment reminders'),
-            ),
-            SwitchListTile(
-              value: _generalNotifications,
-              onChanged: (v) => setState(() => _generalNotifications = v),
-              title: const Text('General notifications'),
-            ),
+            const SectionTitle('Notifications'),
             const SizedBox(height: AppSpacing.md),
-            _SectionHeader('Privacy & Security'),
-            SwitchListTile(
-              value: _biometricLock,
-              onChanged: (v) => setState(() => _biometricLock = v),
-              title: const Text('Biometric app lock'),
-              subtitle: const Text('Requires Face ID / fingerprint to open the app'),
-            ),
-            const SizedBox(height: AppSpacing.md),
-            _SectionHeader('Application'),
-            SwitchListTile(
-              value: _darkMode,
-              onChanged: (v) => setState(() => _darkMode = v),
-              title: const Text('Dark mode'),
-            ),
-            ListTile(
-              title: const Text('Language'),
-              trailing: DropdownButton<String>(
-                value: _language,
-                items: AppLanguages.all.map((l) => DropdownMenuItem(value: l, child: Text(l))).toList(),
-                onChanged: (v) => setState(() => _language = v ?? _language),
+            _Group(children: [
+              _SwitchRow(
+                icon: Icons.medication_outlined,
+                title: 'Medication reminders',
+                value: _medicationReminders,
+                onChanged: (v) => setState(() => _medicationReminders = v),
               ),
-            ),
-            ListTile(
-              title: const Text('About'),
-              trailing: const Icon(Icons.chevron_right),
+              _SwitchRow(
+                icon: Icons.event_outlined,
+                title: 'Appointment reminders',
+                value: _appointmentReminders,
+                onChanged: (v) => setState(() => _appointmentReminders = v),
+              ),
+              _SwitchRow(
+                icon: Icons.notifications_outlined,
+                title: 'General notifications',
+                value: _generalNotifications,
+                onChanged: (v) => setState(() => _generalNotifications = v),
+              ),
+            ]),
+            const SizedBox(height: AppSpacing.lg),
+            const SectionTitle('Privacy & Security'),
+            const SizedBox(height: AppSpacing.md),
+            _Group(children: [
+              _SwitchRow(
+                icon: Icons.fingerprint,
+                title: 'Biometric app lock',
+                subtitle: 'Requires Face ID / fingerprint to open the app',
+                value: _biometricLock,
+                onChanged: (v) => setState(() => _biometricLock = v),
+              ),
+            ]),
+            const SizedBox(height: AppSpacing.lg),
+            const SectionTitle('Application'),
+            const SizedBox(height: AppSpacing.md),
+            _Group(children: [
+              _SwitchRow(
+                icon: Icons.dark_mode_outlined,
+                title: 'Dark mode',
+                value: _darkMode,
+                onChanged: (v) => setState(() => _darkMode = v),
+              ),
+              ListTile(
+                leading: const _Bubble(Icons.language_outlined),
+                title: const Text('Language', style: _rowTitle),
+                trailing: DropdownButton<String>(
+                  value: _language,
+                  underline: const SizedBox.shrink(),
+                  borderRadius: BorderRadius.circular(AppRadius.field),
+                  items: AppLanguages.all.map((l) => DropdownMenuItem(value: l, child: Text(l))).toList(),
+                  onChanged: (v) => setState(() => _language = v ?? _language),
+                ),
+              ),
+            ]),
+            const SizedBox(height: AppSpacing.md),
+            AppTile(
+              icon: Icons.info_outline,
+              title: 'About',
               onTap: () => showAboutDialog(
                 context: context,
                 applicationName: 'DAWI',
@@ -86,12 +105,47 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }
 }
 
-class _SectionHeader extends StatelessWidget {
-  final String title;
-  const _SectionHeader(this.title);
+const TextStyle _rowTitle = TextStyle(fontWeight: FontWeight.w600, fontSize: 14.5, color: AppColors.textPrimary);
+
+/// Translucent white panel holding a group of rows.
+class _Group extends StatelessWidget {
+  final List<Widget> children;
+  const _Group({required this.children});
   @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(bottom: 4),
-        child: Text(title, style: const TextStyle(fontWeight: FontWeight.w700, color: AppColors.textSecondary, fontSize: 13)),
+  Widget build(BuildContext context) => AppPanel(
+        padding: const EdgeInsets.symmetric(vertical: AppSpacing.xs),
+        child: Column(children: children),
+      );
+}
+
+/// Teal icon on a mint circle, as in AppTile.
+class _Bubble extends StatelessWidget {
+  final IconData icon;
+  const _Bubble(this.icon);
+  @override
+  Widget build(BuildContext context) => Container(
+        width: 40,
+        height: 40,
+        decoration: const BoxDecoration(color: AppColors.mint, shape: BoxShape.circle),
+        child: Icon(icon, color: AppColors.teal, size: 20),
+      );
+}
+
+class _SwitchRow extends StatelessWidget {
+  final IconData icon;
+  final String title;
+  final String? subtitle;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+  const _SwitchRow({required this.icon, required this.title, this.subtitle, required this.value, required this.onChanged});
+  @override
+  Widget build(BuildContext context) => SwitchListTile(
+        value: value,
+        onChanged: onChanged,
+        secondary: _Bubble(icon),
+        title: Text(title, style: _rowTitle),
+        subtitle: subtitle == null
+            ? null
+            : Text(subtitle!, style: const TextStyle(fontSize: 12.5, color: AppColors.textSecondary)),
       );
 }

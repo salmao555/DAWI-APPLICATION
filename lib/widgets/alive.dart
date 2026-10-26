@@ -303,3 +303,114 @@ class FadeSlideIn extends StatelessWidget {
     );
   }
 }
+
+/// Bold section heading used above groups of tiles.
+class SectionTitle extends StatelessWidget {
+  const SectionTitle(this.text, {super.key});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) =>
+      Text(text, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 17, color: AppColors.textPrimary));
+}
+
+/// Shared list row: translucent white, soft shadow, teal icon on a mint
+/// circle (or a custom [leading]), chevron when tappable. [trailing]
+/// replaces the chevron (e.g. a value or a badge). [destructive] tints the
+/// icon and title red.
+class AppTile extends StatelessWidget {
+  const AppTile({
+    super.key,
+    required this.title,
+    this.icon,
+    this.leading,
+    this.subtitle,
+    this.trailing,
+    this.maxSubtitleLines = 1,
+    this.onTap,
+    this.destructive = false,
+    this.margin = const EdgeInsets.only(bottom: AppSpacing.md),
+  });
+
+  final String title;
+  final IconData? icon;
+  final Widget? leading;
+  final String? subtitle;
+  final Widget? trailing;
+  final int maxSubtitleLines;
+  final VoidCallback? onTap;
+  final bool destructive;
+  final EdgeInsets margin;
+
+  @override
+  Widget build(BuildContext context) {
+    final accent = destructive ? Colors.redAccent : AppColors.teal;
+    return Padding(
+      padding: margin,
+      child: PressableScale(
+        onTap: onTap,
+        borderRadius: AppRadius.card,
+        scale: 0.97,
+        hoverScale: 1.02,
+        shadows: AppShadows.soft,
+        child: Container(
+          color: AppColors.cardBackground,
+          padding: const EdgeInsets.all(AppSpacing.md),
+          child: Row(children: [
+            leading ??
+                Container(
+                  width: 44,
+                  height: 44,
+                  decoration: BoxDecoration(
+                    color: destructive ? Colors.redAccent.withValues(alpha: 0.12) : AppColors.mint,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Icon(icon, color: accent, size: 22),
+                ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Text(title,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 14.5,
+                      color: destructive ? Colors.redAccent : AppColors.textPrimary,
+                    )),
+                if (subtitle != null && subtitle!.isNotEmpty) ...[
+                  const SizedBox(height: 2),
+                  Text(subtitle!,
+                      maxLines: maxSubtitleLines,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 12.5, color: AppColors.textSecondary)),
+                ],
+              ]),
+            ),
+            if (trailing != null) ...[const SizedBox(width: AppSpacing.sm), trailing!],
+            if (trailing == null && onTap != null) const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
+          ]),
+        ),
+      ),
+    );
+  }
+}
+
+/// Translucent white container for grouped content (info rows, switches).
+class AppPanel extends StatelessWidget {
+  const AppPanel({super.key, required this.child, this.padding = const EdgeInsets.all(AppSpacing.md)});
+
+  final Widget child;
+  final EdgeInsets padding;
+
+  @override
+  Widget build(BuildContext context) => Container(
+        width: double.infinity,
+        padding: padding,
+        decoration: BoxDecoration(
+          color: AppColors.cardBackground,
+          borderRadius: BorderRadius.circular(AppRadius.card),
+          boxShadow: AppShadows.soft,
+        ),
+        child: child,
+      );
+}

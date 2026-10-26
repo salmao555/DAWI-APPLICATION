@@ -13,6 +13,7 @@ class AppColors {
   static const Color mint = Color(0xFFE3F6F3);
   static const Color alertAmber = Color(0xFFFFE9B5); // appointment banner only
   static const Color navDark = Color(0xFF14211F); // floating nav pill
+  static const Color darkCard = Color(0xD914211F); // navDark 85%: home stat cards, profile hero
 
   // Main-screen background gradient (top -> bottom)
   static const Color backgroundTop = Color(0xFFCDEBE6);
@@ -64,6 +65,18 @@ class AppRadius {
   static const double card = 24;
   static const double button = 30; // pill
   static const double field = 20;
+}
+
+/// Dark pill for secondary actions (the nav-pill look): white label, teal icon.
+class AppButtons {
+  AppButtons._();
+
+  static final ButtonStyle dark = OutlinedButton.styleFrom(
+    backgroundColor: AppColors.darkCard,
+    foregroundColor: Colors.white,
+    iconColor: AppColors.teal,
+    side: BorderSide.none,
+  );
 }
 
 class AppShadows {
@@ -179,18 +192,20 @@ class AppTheme {
         ),
       ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: AppColors.primary,
+        backgroundColor: AppColors.darkCard,
         foregroundColor: Colors.white,
         elevation: 4,
-        shape: CircleBorder(),
+        shape: StadiumBorder(),
       ),
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.chipBackground,
-        selectedColor: AppColors.mint,
+        selectedColor: AppColors.darkCard,
+        checkmarkColor: AppColors.teal,
         side: BorderSide.none,
         shape: const StadiumBorder(),
-        labelStyle: const TextStyle(
-          color: AppColors.textPrimary,
+        labelStyle: TextStyle(
+          color: WidgetStateColor.resolveWith((states) =>
+              states.contains(WidgetState.selected) ? Colors.white : AppColors.textPrimary),
           fontWeight: FontWeight.w600,
         ),
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
@@ -238,6 +253,19 @@ class AppTheme {
                 : AppColors.textSecondary,
           );
         }),
+      ),
+      tabBarTheme: const TabBarThemeData(
+        labelColor: AppColors.textPrimary,
+        unselectedLabelColor: AppColors.textSecondary,
+        indicatorColor: AppColors.teal,
+        dividerColor: Colors.transparent,
+      ),
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith((states) =>
+            states.contains(WidgetState.selected) ? AppColors.teal : AppColors.textSecondary),
+        trackColor: WidgetStateProperty.resolveWith((states) =>
+            states.contains(WidgetState.selected) ? AppColors.navDark : AppColors.chipBackground),
+        trackOutlineColor: const WidgetStatePropertyAll(Colors.transparent),
       ),
       bottomSheetTheme: const BottomSheetThemeData(
         backgroundColor: Colors.white,

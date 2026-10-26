@@ -4,6 +4,7 @@ import '../../core/constants.dart';
 import '../../models/api_models.dart';
 import '../../services/api_service.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/alive.dart';
 
 /// Medication details page (spec section 14): dosage/instructions plus a
 /// reminder-time picker. NOTE: reminder scheduling here is UI-only for now
@@ -65,9 +66,7 @@ class _MedicationDetailsScreenState extends State<MedicationDetailsScreen> {
                   const SizedBox(height: 4),
                   Text(MedicationStatus.label(m.status), style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600)),
                   const SizedBox(height: AppSpacing.lg),
-                  Container(
-                    padding: const EdgeInsets.all(AppSpacing.md),
-                    decoration: BoxDecoration(color: Colors.white, borderRadius: BorderRadius.circular(16), border: Border.all(color: AppColors.divider)),
+                  AppPanel(
                     child: Column(children: [
                       _Row(label: 'Dose', value: m.dose),
                       const SizedBox(height: 10),
@@ -80,8 +79,8 @@ class _MedicationDetailsScreenState extends State<MedicationDetailsScreen> {
                     ]),
                   ),
                   const SizedBox(height: AppSpacing.lg),
-                  const Text('Reminder schedule', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
-                  const SizedBox(height: AppSpacing.sm),
+                  const SectionTitle('Reminder schedule'),
+                  const SizedBox(height: AppSpacing.md),
                   Wrap(
                     spacing: 8,
                     children: ['Morning', 'Afternoon', 'Evening', 'Custom'].map((slot) {

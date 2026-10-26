@@ -6,6 +6,7 @@ import '../../core/constants.dart';
 import '../../models/api_models.dart';
 import '../../services/api_service.dart';
 import '../../theme/app_theme.dart';
+import '../../widgets/alive.dart';
 import '../../widgets/empty_state.dart';
 import 'document_details_screen.dart';
 import 'ocr_analysis_screen.dart';
@@ -101,7 +102,7 @@ class DocumentsScreenState extends State<DocumentsScreen> {
       appBar: AppBar(title: const Text('Documents')),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _isUploading ? null : _showScanUploadSheet,
-        icon: const Icon(Icons.add),
+        icon: const Icon(Icons.add, color: AppColors.teal),
         label: const Text('Add document'),
       ),
       body: SafeArea(
@@ -153,10 +154,9 @@ class DocumentsScreenState extends State<DocumentsScreen> {
                             EmptyState(icon: Icons.folder_open_outlined, message: 'No medical documents yet.'),
                           ]);
                         }
-                        return ListView.separated(
+                        return ListView.builder(
                           padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.md, AppSpacing.md, 96),
                           itemCount: docs.length,
-                          separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
                           itemBuilder: (context, i) => _DocumentCard(document: docs[i]),
                         );
                       },
@@ -167,7 +167,7 @@ class DocumentsScreenState extends State<DocumentsScreen> {
             ),
             if (_isUploading)
               Container(
-                color: Colors.black.withOpacity(0.35),
+                color: Colors.black.withValues(alpha: 0.35),
                 child: const Center(
                   child: Card(
                     child: Padding(
@@ -194,16 +194,14 @@ class _FilterChip extends StatelessWidget {
   final VoidCallback onTap;
   const _FilterChip({required this.label, required this.selected, required this.onTap});
 
+  /// Colors come from the chip theme: dark pill when selected.
   @override
-  Widget build(BuildContext context) {
-    return ChoiceChip(
-      label: Text(label),
-      selected: selected,
-      onSelected: (_) => onTap(),
-      selectedColor: AppColors.primaryLight,
-      labelStyle: TextStyle(color: selected ? AppColors.primary : AppColors.textPrimary, fontWeight: FontWeight.w600),
-    );
-  }
+  Widget build(BuildContext context) => ChoiceChip(
+        label: Text(label),
+        selected: selected,
+        showCheckmark: false,
+        onSelected: (_) => onTap(),
+      );
 }
 
 class _DocumentCard extends StatelessWidget {
@@ -217,59 +215,32 @@ class _DocumentCard extends StatelessWidget {
         ? document.documentDate
         : DateFormat('d MMM yyyy').format(document.createdAt);
 
-    return InkWell(
-      borderRadius: BorderRadius.circular(16),
+    return AppTile(
+      title: DocumentTypes.label(document.documentType),
+      subtitle: document.doctorName.isEmpty ? dateStr : '${document.doctorName} · $dateStr',
       onTap: () => Navigator.push(
         context,
         MaterialPageRoute(builder: (_) => DocumentDetailsScreen(documentId: document.id)),
       ),
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.sm),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.divider),
-        ),
-        child: Row(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: SizedBox(
-                width: 56,
-                height: 56,
-                child: imageUrl.isEmpty
-                    ? Container(color: AppColors.chipBackground, child: const Icon(Icons.description_outlined))
-                    : Image.network(
-                        imageUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
-                          color: AppColors.chipBackground,
-                          child: const Icon(Icons.description_outlined),
-                        ),
-                      ),
-              ),
-            ),
-            const SizedBox(width: AppSpacing.sm),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(DocumentTypes.label(document.documentType),
-                      style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14)),
-                  const SizedBox(height: 2),
-                  Text(
-                    document.doctorName.isEmpty ? dateStr : '${document.doctorName} · $dateStr',
-                    style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
-              ),
-            ),
-            const Icon(Icons.chevron_right, color: AppColors.textSecondary),
-          ],
+      leading: ClipRRect(
+        borderRadius: BorderRadius.circular(14),
+        child: SizedBox(
+          width: 52,
+          height: 52,
+          child: imageUrl.isEmpty
+              ? const _ThumbPlaceholder()
+              : Image.network(imageUrl, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const _ThumbPlaceholder()),
         ),
       ),
     );
   }
+}
+
+class _ThumbPlaceholder extends StatelessWidget {
+  const _ThumbPlaceholder();
+  @override
+  Widget build(BuildContext context) => const ColoredBox(
+        color: AppColors.mint,
+        child: Icon(Icons.description_outlined, color: AppColors.teal),
+      );
 }

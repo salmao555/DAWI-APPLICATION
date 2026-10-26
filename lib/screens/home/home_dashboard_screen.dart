@@ -1,6 +1,9 @@
+import 'dart:math' as math;
+
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
 import '../../models/api_models.dart';
@@ -8,6 +11,7 @@ import '../../providers/auth_provider.dart';
 import '../../services/api_service.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/alive.dart';
+import '../../widgets/appointment_calendar_sheet.dart';
 import '../ai/ai_assistant_screen.dart';
 import '../appointments/appointments_screen.dart';
 import '../documents/document_details_screen.dart';
@@ -157,7 +161,7 @@ class HomeDashboardScreenState extends State<HomeDashboardScreen> {
                         AppSpacing.lg,
                         AppSpacing.lg,
                         AppSpacing.lg,
-                        AppSpacing.xl + MediaQuery.paddingOf(context).bottom,
+                        math.max(_minBottomPadding, AppSpacing.xl + MediaQuery.paddingOf(context).bottom),
                       ),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
@@ -270,15 +274,19 @@ class HomeDashboardScreenState extends State<HomeDashboardScreen> {
           FadeSlideIn(
             index: 2,
             child: _AlertBanner(
-              text: 'Your ${data.upcomingAppointments.first.specialty.isEmpty ? 'appointment' : data.upcomingAppointments.first.specialty} '
-                  'is on ${data.upcomingAppointments.first.date} at ${data.upcomingAppointments.first.time}.',
+              text: _appointmentText(data.upcomingAppointments.first),
+              onTap: () => showAppointmentCalendarSheet(
+                context,
+                appointments: data.upcomingAppointments,
+                onViewAll: () => _push(const AppointmentsScreen()),
+              ),
             ),
           ),
           const SizedBox(height: AppSpacing.lg),
         ],
 
         // Quick actions: four equal outlined-icon tiles
-        const _SectionTitle('Categories'),
+        const SectionTitle('Categories'),
         const SizedBox(height: AppSpacing.md),
         FadeSlideIn(
           index: 3,
@@ -290,17 +298,17 @@ class HomeDashboardScreenState extends State<HomeDashboardScreen> {
         const SizedBox(height: AppSpacing.md),
 
         // Today's reminders (derived from active meds / upcoming appts)
-        const _SectionTitle("Today's reminders"),
+        const SectionTitle("Today's reminders"),
         const SizedBox(height: AppSpacing.md),
         if (data.activeMedications.isEmpty && data.upcomingAppointments.isEmpty)
           const Text('Nothing scheduled for today.', style: TextStyle(color: AppColors.textSecondary))
         else ...[
-          ...data.activeMedications.take(3).map((m) => _ReminderTile(
+          ...data.activeMedications.take(3).map((m) => AppTile(
                 icon: Icons.medication_outlined,
                 title: m.name,
                 subtitle: '${m.timing} · ${m.frequency}',
               )),
-          ...data.upcomingAppointments.take(2).map((a) => _ReminderTile(
+          ...data.upcomingAppointments.take(2).map((a) => AppTile(
                 icon: Icons.event_outlined,
                 title: a.specialty.isEmpty ? 'Appointment' : a.specialty,
                 subtitle: '${a.date} ${a.time}',
@@ -309,13 +317,13 @@ class HomeDashboardScreenState extends State<HomeDashboardScreen> {
         const SizedBox(height: AppSpacing.lg),
 
         // Recent activity (recent documents)
-        const _SectionTitle('Recent activity'),
+        const SectionTitle('Recent activity'),
         const SizedBox(height: AppSpacing.md),
         if (data.recentDocuments.isEmpty)
           const Text('No recent activity yet — scan your first document to get started.',
               style: TextStyle(color: AppColors.textSecondary))
         else
-          ...data.recentDocuments.map((d) => _ReminderTile(
+          ...data.recentDocuments.map((d) => AppTile(
                 icon: Icons.description_outlined,
                 title: d.documentType.isNotEmpty ? d.documentType : 'Document',
                 subtitle: d.aiSummary.isNotEmpty ? d.aiSummary : '${d.documentType} added',
@@ -327,8 +335,21 @@ class HomeDashboardScreenState extends State<HomeDashboardScreen> {
   }
 }
 
-/// Stat card fill: same dark as the floating nav pill (StatCard switches to light text/icons).
-const List<Color> _cardFill = [AppColors.navDark, AppColors.navDark];
+/// Stat card fill: white 85% (StatCard uses dark text and a teal icon on mint).
+const List<Color> _cardFill = [Color(0xD9FFFFFF), Color(0xD9FFFFFF)];
+
+/// Keeps the last content clear of the floating nav bar.
+const double _minBottomPadding = 120;
+
+/// e.g. "Your Cardiology is on Sat 12 Dec at 02:04." — falls back to the raw
+/// date string if it isn't "YYYY-MM-DD".
+String _appointmentText(ApiAppointment a) {
+  final what = a.specialty.isEmpty ? 'appointment' : a.specialty;
+  final parsed = DateTime.tryParse(a.date);
+  final date = parsed != null ? DateFormat('EEE d MMM').format(parsed) : a.date;
+  final at = a.time.isNotEmpty ? ' at ${a.time}' : '';
+  return 'Your $what is on $date$at.';
+}
 
 /// How far the content sheet slides up over the teal header.
 const double _sheetOverlap = 24;
@@ -351,7 +372,7 @@ class _Header extends StatelessWidget {
           AppSpacing.lg,
           MediaQuery.paddingOf(context).top + AppSpacing.lg,
           AppSpacing.lg,
-          AppSpacing.xl + _sheetOverlap,
+          AppSpacing.md + _sheetOverlap, // ~30% less empty space than xl
         ),
         child: FadeSlideIn(
           child: Row(children: [
@@ -449,78 +470,21 @@ class _QuickAction extends StatelessWidget {
           textAlign: TextAlign.center,
           maxLines: 2,
           overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontSize: 12, height: 1.3, color: AppColors.textPrimary),
+          style: const TextStyle(fontSize: 12.5, height: 1.3, fontWeight: FontWeight.w500, color: AppColors.textPrimary),
         ),
       ]);
 }
 
-class _SectionTitle extends StatelessWidget {
-  final String text;
-  const _SectionTitle(this.text);
-  @override
-  Widget build(BuildContext context) =>
-      Text(text, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 17, color: AppColors.textPrimary));
-}
-
-/// White soft-shadow row used for reminders and recent documents.
-class _ReminderTile extends StatelessWidget {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final int maxSubtitleLines;
-  final VoidCallback? onTap;
-  const _ReminderTile({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    this.maxSubtitleLines = 1,
-    this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(bottom: AppSpacing.md),
-        child: PressableScale(
-          onTap: onTap,
-          borderRadius: AppRadius.card,
-          scale: 0.97,
-          hoverScale: 1.02,
-          shadows: AppShadows.soft,
-          child: Container(
-            color: AppColors.cardBackground,
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: Row(children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: const BoxDecoration(color: AppColors.mint, shape: BoxShape.circle),
-                child: Icon(icon, color: AppColors.teal, size: 22),
-              ),
-              const SizedBox(width: AppSpacing.md),
-              Expanded(
-                child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(title, style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 14.5)),
-                  const SizedBox(height: 2),
-                  Text(subtitle,
-                      maxLines: maxSubtitleLines,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 12.5, color: AppColors.textSecondary)),
-                ]),
-              ),
-              if (onTap != null) const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
-            ]),
-          ),
-        ),
-      );
-}
-
 /// Amber banner for the next appointment (the only non-teal accent).
+/// Tapping opens the appointment calendar.
 class _AlertBanner extends StatelessWidget {
   final String text;
-  const _AlertBanner({required this.text});
+  final VoidCallback onTap;
+  const _AlertBanner({required this.text, required this.onTap});
   @override
   Widget build(BuildContext context) => GradientCard(
         colors: const [AppColors.alertAmber, AppColors.alertAmber],
+        onTap: onTap,
         radius: AppRadius.card,
         padding: const EdgeInsets.all(AppSpacing.md),
         child: Row(children: [
@@ -534,6 +498,8 @@ class _AlertBanner extends StatelessWidget {
             child: Text(text,
                 style: const TextStyle(fontSize: 13.5, height: 1.4, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
           ),
+          const SizedBox(width: AppSpacing.sm),
+          const Icon(Icons.chevron_right_rounded, color: AppColors.textPrimary),
         ]),
       );
 }
