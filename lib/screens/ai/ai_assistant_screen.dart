@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../services/api_service.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/alive.dart';
 import '../../widgets/gradient_scaffold_background.dart';
 
-const _suggestedQuestions = [
-  'Explain this document to me.',
-  'What does this medical term mean?',
-  'Summarize my latest analyses.',
-  'What are my next appointments?',
-  'Remind me about my medications.',
-  'Prepare questions for my doctor.',
-];
+/// Suggested first questions, in the app language (sent as typed).
+List<String> _suggestedQuestions(AppLocalizations l10n) => [
+      l10n.chatSuggest1,
+      l10n.chatSuggest2,
+      l10n.chatSuggest3,
+      l10n.chatSuggest4,
+      l10n.chatSuggest5,
+      l10n.chatSuggest6,
+    ];
 
 /// Conversational "AI Health Assistant" (spec section 20). If [documentId]
 /// is provided, every reply is grounded in that document; otherwise the
@@ -52,12 +54,12 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
       setState(() {
         _messages.addAll(history.map((m) => _ChatMessage(m['content'] ?? '', isUser: m['role'] == 'user')));
         if (_messages.isEmpty) {
-          _messages.add(const _ChatMessage('Hello! How can I help you today?'));
+          _messages.add(_ChatMessage(AppLocalizations.of(context).chatGreeting));
         }
       });
     } catch (_) {
       if (!mounted) return;
-      setState(() => _messages.add(const _ChatMessage('Hello! How can I help you today?')));
+      setState(() => _messages.add(_ChatMessage(AppLocalizations.of(context).chatGreeting)));
     } finally {
       if (mounted) setState(() => _isLoadingHistory = false);
     }
@@ -80,7 +82,7 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
       setState(() => _messages.add(_ChatMessage(reply)));
     } on ApiException catch (e) {
       if (!mounted) return;
-      setState(() => _messages.add(_ChatMessage("The AI assistant is temporarily unavailable: ${e.message}")));
+      setState(() => _messages.add(_ChatMessage(AppLocalizations.of(context).chatUnavailable(e.message))));
     } finally {
       if (mounted) setState(() => _isSending = false);
       _scrollToBottom();
@@ -105,6 +107,7 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       body: GradientScaffoldBackground(
         child: SafeArea(
@@ -116,7 +119,7 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
                   const CircleAvatar(
                       radius: 18, backgroundColor: AppColors.darkCard, child: Icon(Icons.smart_toy_outlined, size: 18, color: AppColors.lightBlue)),
                   const SizedBox(width: AppSpacing.sm),
-                  const Text('Health Assistant', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18)),
+                  Text(l10n.chatTitle, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18)),
                 ]),
               ),
               if (_messages.length <= 1)
@@ -125,7 +128,7 @@ class _AiAssistantScreenState extends State<AiAssistantScreen> {
                   child: Wrap(
                     spacing: 8,
                     runSpacing: 8,
-                    children: _suggestedQuestions
+                    children: _suggestedQuestions(l10n)
                         .map((q) => ActionChip(
                               avatar: const Icon(Icons.auto_awesome_outlined, size: 16, color: AppColors.teal),
                               backgroundColor: AppColors.cardBackground,
@@ -163,7 +166,7 @@ class _MessageBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final align = message.isUser ? Alignment.centerRight : Alignment.centerLeft;
+    final align = message.isUser ? AlignmentDirectional.centerEnd : AlignmentDirectional.centerStart;
     final bubbleColor = message.isUser ? AppColors.darkCard : AppColors.cardBackground;
     final textColor = message.isUser ? Colors.white : AppColors.textPrimary;
 
@@ -175,11 +178,11 @@ class _MessageBubble extends StatelessWidget {
         constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.75),
         decoration: BoxDecoration(
           color: bubbleColor,
-          borderRadius: BorderRadius.only(
-            topLeft: const Radius.circular(16),
-            topRight: const Radius.circular(16),
-            bottomLeft: Radius.circular(message.isUser ? 16 : 4),
-            bottomRight: Radius.circular(message.isUser ? 4 : 16),
+          borderRadius: BorderRadiusDirectional.only(
+            topStart: const Radius.circular(16),
+            topEnd: const Radius.circular(16),
+            bottomStart: Radius.circular(message.isUser ? 16 : 4),
+            bottomEnd: Radius.circular(message.isUser ? 4 : 16),
           ),
         ),
         child: Text(message.text, style: TextStyle(color: textColor, fontSize: 14.5, height: 1.35)),
@@ -192,7 +195,7 @@ class _TypingIndicator extends StatelessWidget {
   const _TypingIndicator();
   @override
   Widget build(BuildContext context) => const Align(
-        alignment: Alignment.centerLeft,
+        alignment: AlignmentDirectional.centerStart,
         child: Padding(
           padding: EdgeInsets.symmetric(vertical: 4),
           child: SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2)),
@@ -216,7 +219,7 @@ class _ChatInputBar extends StatelessWidget {
             controller: controller,
             enabled: enabled,
             onSubmitted: (_) => onSend(),
-            decoration: const InputDecoration(hintText: 'Ask your Health Assistant...', fillColor: Colors.white),
+            decoration: InputDecoration(hintText: AppLocalizations.of(context).chatInputHint, fillColor: Colors.white),
           ),
         ),
         const SizedBox(width: 8),

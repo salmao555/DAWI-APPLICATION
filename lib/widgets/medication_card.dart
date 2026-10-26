@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/medication.dart';
+import '../l10n/app_localizations.dart';
 import '../theme/app_theme.dart';
 
 /// Card that shows one extracted medication with dose / frequency / timing,
@@ -77,11 +78,11 @@ class MedicationCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.sm),
           const Divider(height: 1, color: AppColors.divider),
           const SizedBox(height: AppSpacing.sm),
-          _InfoRow(icon: Icons.local_pharmacy_outlined, label: 'Dose', value: medication.dose),
+          _InfoRow(icon: Icons.local_pharmacy_outlined, label: AppLocalizations.of(context).fieldDose, value: medication.dose),
           const SizedBox(height: 6),
-          _InfoRow(icon: Icons.event_repeat, label: 'Frequency', value: medication.frequency),
+          _InfoRow(icon: Icons.event_repeat, label: AppLocalizations.of(context).fieldFrequency, value: medication.frequency),
           const SizedBox(height: 6),
-          _InfoRow(icon: Icons.schedule, label: 'Timing', value: medication.timing),
+          _InfoRow(icon: Icons.schedule, label: AppLocalizations.of(context).fieldTiming, value: medication.timing),
         ],
       ),
     );

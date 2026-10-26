@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../../core/constants.dart';
+import '../../core/l10n_helpers.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/api_models.dart';
 import '../../services/api_service.dart';
 import '../../theme/app_theme.dart';
@@ -41,9 +42,16 @@ class _MedicationDetailsScreenState extends State<MedicationDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final slotLabels = {
+      'Morning': l10n.slotMorning,
+      'Afternoon': l10n.slotAfternoon,
+      'Evening': l10n.slotEvening,
+      'Custom': l10n.slotCustom,
+    };
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Medication details'),
+        title: Text(l10n.medicationDetailsTitle),
         actions: [IconButton(icon: const Icon(Icons.delete_outline), onPressed: _delete)],
       ),
       body: SafeArea(
@@ -54,7 +62,7 @@ class _MedicationDetailsScreenState extends State<MedicationDetailsScreen> {
               return const Center(child: CircularProgressIndicator());
             }
             if (snapshot.hasError || !snapshot.hasData) {
-              return const Center(child: Text("Couldn't load this medication."));
+              return Center(child: Text(l10n.medicationLoadError));
             }
             final m = snapshot.data!;
             return SingleChildScrollView(
@@ -64,29 +72,29 @@ class _MedicationDetailsScreenState extends State<MedicationDetailsScreen> {
                 children: [
                   Text(m.name, style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
                   const SizedBox(height: 4),
-                  Text(MedicationStatus.label(m.status), style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600)),
+                  Text(medicationStatusLabel(l10n, m.status), style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600)),
                   const SizedBox(height: AppSpacing.lg),
                   AppPanel(
                     child: Column(children: [
-                      _Row(label: 'Dose', value: m.dose),
+                      _Row(label: l10n.fieldDose, value: m.dose),
                       const SizedBox(height: 10),
-                      _Row(label: 'Frequency', value: m.frequency),
+                      _Row(label: l10n.fieldFrequency, value: m.frequency),
                       const SizedBox(height: 10),
-                      _Row(label: 'Timing', value: m.timing),
-                      if (m.doctorName.isNotEmpty) ...[const SizedBox(height: 10), _Row(label: 'Prescribed by', value: m.doctorName)],
-                      if (m.startDate.isNotEmpty) ...[const SizedBox(height: 10), _Row(label: 'Start date', value: m.startDate)],
-                      if (m.endDate.isNotEmpty) ...[const SizedBox(height: 10), _Row(label: 'End date', value: m.endDate)],
+                      _Row(label: l10n.fieldTiming, value: m.timing),
+                      if (m.doctorName.isNotEmpty) ...[const SizedBox(height: 10), _Row(label: l10n.labelPrescribedBy, value: m.doctorName)],
+                      if (m.startDate.isNotEmpty) ...[const SizedBox(height: 10), _Row(label: l10n.labelStartDate, value: formatLongDate(m.startDate))],
+                      if (m.endDate.isNotEmpty) ...[const SizedBox(height: 10), _Row(label: l10n.labelEndDate, value: formatLongDate(m.endDate))],
                     ]),
                   ),
                   const SizedBox(height: AppSpacing.lg),
-                  const SectionTitle('Reminder schedule'),
+                  SectionTitle(l10n.reminderSchedule),
                   const SizedBox(height: AppSpacing.md),
                   Wrap(
                     spacing: 8,
-                    children: ['Morning', 'Afternoon', 'Evening', 'Custom'].map((slot) {
+                    children: slotLabels.keys.map((slot) {
                       final selected = _reminderTimes.contains(slot);
                       return FilterChip(
-                        label: Text(slot),
+                        label: Text(slotLabels[slot]!),
                         selected: selected,
                         onSelected: (v) => setState(() => v ? _reminderTimes.add(slot) : _reminderTimes.remove(slot)),
                       );
@@ -97,10 +105,10 @@ class _MedicationDetailsScreenState extends State<MedicationDetailsScreen> {
                     onPressed: _reminderTimes.isEmpty
                         ? null
                         : () => ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Reminder set for: ${_reminderTimes.join(', ')}')),
+                              SnackBar(content: Text(l10n.reminderSetFor(_reminderTimes.map((t) => slotLabels[t]!).join(', ')))),
                             ),
                     icon: const Icon(Icons.alarm_add_outlined),
-                    label: const Text('Create reminder'),
+                    label: Text(l10n.createReminder),
                   ),
                 ],
               ),

@@ -1,9 +1,10 @@
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../../core/l10n_helpers.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/api_models.dart';
 import '../../providers/auth_provider.dart';
 import '../../services/api_service.dart';
@@ -75,7 +76,7 @@ class HomeDashboardScreenState extends State<HomeDashboardScreen> {
     } on ApiException catch (e) {
       _showError(e.message);
     } catch (e) {
-      _showError('Could not access camera/gallery: $e');
+      if (mounted) _showError(AppLocalizations.of(context).errorCameraAccess('$e'));
     } finally {
       if (mounted) setState(() => _isUploading = false);
     }
@@ -101,7 +102,7 @@ class HomeDashboardScreenState extends State<HomeDashboardScreen> {
             const SizedBox(height: AppSpacing.lg),
             QuickActionTile(
               icon: Icons.photo_camera_outlined,
-              label: 'Scan with camera',
+              label: AppLocalizations.of(context).scanWithCamera,
               colors: AppGradients.teal,
               onTap: () {
                 Navigator.pop(context);
@@ -111,7 +112,7 @@ class HomeDashboardScreenState extends State<HomeDashboardScreen> {
             const SizedBox(height: AppSpacing.sm),
             QuickActionTile(
               icon: Icons.image_outlined,
-              label: 'Upload from gallery',
+              label: AppLocalizations.of(context).uploadFromGallery,
               colors: AppGradients.lilac,
               onTap: () {
                 Navigator.pop(context);
@@ -128,11 +129,12 @@ class HomeDashboardScreenState extends State<HomeDashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final user = context.watch<AuthProvider>().user;
-    final firstName = user?.firstName.isNotEmpty == true ? user!.firstName : 'there';
+    final firstName = user?.firstName.isNotEmpty == true ? user!.firstName : null;
     final hour = DateTime.now().hour;
-    final greeting = hour < 12 ? 'Good morning' : (hour < 18 ? 'Good afternoon' : 'Good evening');
-    final initial = firstName.isNotEmpty ? firstName[0].toUpperCase() : '?';
+    final greeting = hour < 12 ? l10n.greetingMorning : (hour < 18 ? l10n.greetingAfternoon : l10n.greetingEvening);
+    final initial = firstName != null ? firstName[0].toUpperCase() : '?';
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: SystemUiOverlayStyle.light,
@@ -143,8 +145,8 @@ class HomeDashboardScreenState extends State<HomeDashboardScreen> {
             onRefresh: () async => refresh(),
             headerBackground: const _HeaderBackground(),
             header: _Header(
-              firstName: firstName,
-              subtitle: '$greeting · How are you feeling today?',
+              title: firstName != null ? l10n.homeWelcomeName(firstName) : l10n.homeWelcome,
+              subtitle: l10n.homeSubtitle(greeting),
               initial: initial,
               onAvatarTap: () => MainShell.of(context)?.goToTab(4),
             ),
@@ -168,7 +170,7 @@ class HomeDashboardScreenState extends State<HomeDashboardScreen> {
                     if (snapshot.hasError) {
                       return Padding(
                         padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
-                        child: Text("Couldn't load your dashboard.\n${snapshot.error}",
+                        child: Text(l10n.homeLoadError('${snapshot.error}'),
                             style: const TextStyle(color: AppColors.textSecondary)),
                       );
                     }
@@ -181,14 +183,14 @@ class HomeDashboardScreenState extends State<HomeDashboardScreen> {
           if (_isUploading)
             Container(
               color: Colors.black.withValues(alpha: 0.35),
-              child: const Center(
+              child: Center(
                 child: Card(
                   child: Padding(
-                    padding: EdgeInsets.all(AppSpacing.lg),
+                    padding: const EdgeInsets.all(AppSpacing.lg),
                     child: Column(mainAxisSize: MainAxisSize.min, children: [
-                      CircularProgressIndicator(),
-                      SizedBox(height: AppSpacing.md),
-                      Text('Analyzing your document...'),
+                      const CircularProgressIndicator(),
+                      const SizedBox(height: AppSpacing.md),
+                      Text(l10n.analyzingDocument),
                     ]),
                   ),
                 ),
@@ -200,11 +202,12 @@ class HomeDashboardScreenState extends State<HomeDashboardScreen> {
   }
 
   Widget _buildContent(_DashboardData data) {
+    final l10n = AppLocalizations.of(context);
     final quickActions = [
-      (Icons.document_scanner_outlined, 'Scan document', _isUploading ? null : _showScanUploadSheet),
-      (Icons.auto_awesome_outlined, 'Ask AI', () => _push(const AiAssistantScreen())),
-      (Icons.medication_outlined, 'Medications', () => _push(const MedicationsScreen())),
-      (Icons.event_outlined, 'Appointments', () => _push(const AppointmentsScreen())),
+      (Icons.document_scanner_outlined, l10n.quickScanDocument, _isUploading ? null : _showScanUploadSheet),
+      (Icons.auto_awesome_outlined, l10n.quickAskAi, () => _push(const AiAssistantScreen())),
+      (Icons.medication_outlined, l10n.quickMedications, () => _push(const MedicationsScreen())),
+      (Icons.event_outlined, l10n.quickAppointments, () => _push(const AppointmentsScreen())),
     ];
 
     return Column(
@@ -218,7 +221,7 @@ class HomeDashboardScreenState extends State<HomeDashboardScreen> {
               Expanded(
                 child: StatCard(
                   image: 'assets/images/caduceus.png',
-                  label: _plural(data.activeMedications.length, 'Treatment'),
+                  label: l10n.statTreatments(data.activeMedications.length),
                   value: '${data.activeMedications.length}',
                   colors: _cardFill,
                   onTap: () => _push(const MedicationsScreen()),
@@ -228,7 +231,7 @@ class HomeDashboardScreenState extends State<HomeDashboardScreen> {
               Expanded(
                 child: StatCard(
                   image: 'assets/images/heart.png',
-                  label: _plural(data.upcomingAppointments.length, 'Appointment'),
+                  label: l10n.statAppointments(data.upcomingAppointments.length),
                   value: '${data.upcomingAppointments.length}',
                   colors: _cardFill,
                   onTap: () => _push(const AppointmentsScreen()),
@@ -238,7 +241,7 @@ class HomeDashboardScreenState extends State<HomeDashboardScreen> {
               Expanded(
                 child: StatCard(
                   image: 'assets/images/dna.png',
-                  label: _plural(data.recentDocuments.length, 'Document'),
+                  label: l10n.statDocuments(data.recentDocuments.length),
                   value: '${data.recentDocuments.length}',
                   colors: _cardFill,
                   onTap: () => MainShell.of(context)?.goToTab(1),
@@ -254,7 +257,7 @@ class HomeDashboardScreenState extends State<HomeDashboardScreen> {
           FadeSlideIn(
             index: 2,
             child: _AlertBanner(
-              text: _appointmentText(data.upcomingAppointments.first),
+              text: _appointmentText(l10n, data.upcomingAppointments.first),
               onTap: () => showAppointmentCalendarSheet(
                 context,
                 appointments: data.upcomingAppointments,
@@ -266,7 +269,7 @@ class HomeDashboardScreenState extends State<HomeDashboardScreen> {
         ],
 
         // Quick actions: four equal outlined-icon tiles
-        const SectionTitle('Categories'),
+        SectionTitle(l10n.sectionCategories),
         const SizedBox(height: AppSpacing.md),
         FadeSlideIn(
           index: 3,
@@ -278,10 +281,10 @@ class HomeDashboardScreenState extends State<HomeDashboardScreen> {
         const SizedBox(height: AppSpacing.md),
 
         // Today's reminders (derived from active meds / upcoming appts)
-        const SectionTitle("Today's reminders"),
+        SectionTitle(l10n.sectionTodaysReminders),
         const SizedBox(height: AppSpacing.md),
         if (data.activeMedications.isEmpty && data.upcomingAppointments.isEmpty)
-          const Text('Nothing scheduled for today.', style: TextStyle(color: AppColors.textSecondary))
+          Text(l10n.nothingScheduledToday, style: const TextStyle(color: AppColors.textSecondary))
         else ...[
           ...data.activeMedications.take(3).map((m) => AppTile(
                 icon: Icons.medication_outlined,
@@ -290,23 +293,22 @@ class HomeDashboardScreenState extends State<HomeDashboardScreen> {
               )),
           ...data.upcomingAppointments.take(2).map((a) => AppTile(
                 icon: Icons.event_outlined,
-                title: a.specialty.isEmpty ? 'Appointment' : a.specialty,
-                subtitle: '${a.date} ${a.time}',
+                title: a.specialty.isEmpty ? l10n.appointmentFallback : a.specialty,
+                subtitle: appointmentWhen(a),
               )),
         ],
         const SizedBox(height: AppSpacing.lg),
 
         // Recent activity (recent documents)
-        const SectionTitle('Recent activity'),
+        SectionTitle(l10n.sectionRecentActivity),
         const SizedBox(height: AppSpacing.md),
         if (data.recentDocuments.isEmpty)
-          const Text('No recent activity yet — scan your first document to get started.',
-              style: TextStyle(color: AppColors.textSecondary))
+          Text(l10n.noRecentActivity, style: const TextStyle(color: AppColors.textSecondary))
         else
           ...data.recentDocuments.map((d) => AppTile(
                 icon: Icons.description_outlined,
-                title: d.documentType.isNotEmpty ? d.documentType : 'Document',
-                subtitle: d.aiSummary.isNotEmpty ? d.aiSummary : '${d.documentType} added',
+                title: documentTypeLabel(l10n, d.documentType),
+                subtitle: d.aiSummary.isNotEmpty ? d.aiSummary : l10n.documentAdded(documentTypeLabel(l10n, d.documentType)),
                 maxSubtitleLines: 2,
                 onTap: () => _push(DocumentDetailsScreen(documentId: d.id)),
               )),
@@ -318,34 +320,31 @@ class HomeDashboardScreenState extends State<HomeDashboardScreen> {
 /// Stat card fill: white 90% (StatCard uses deep blue numbers and icon on a sky blue -> mauve circle).
 const List<Color> _cardFill = [AppColors.cardBackground, AppColors.cardBackground];
 
-/// "1 Treatment", but "0 Treatments" / "2 Treatments".
-String _plural(int count, String singular) => count == 1 ? singular : '${singular}s';
-
-/// e.g. "Your Cardiology is on Sat 12 Dec at 02:04." — falls back to the raw
-/// date string if it isn't "YYYY-MM-DD".
-String _appointmentText(ApiAppointment a) {
-  final what = a.specialty.isEmpty ? 'appointment' : a.specialty;
-  final parsed = DateTime.tryParse(a.date);
-  final date = parsed != null ? DateFormat('EEE d MMM').format(parsed) : a.date;
-  final at = a.time.isNotEmpty ? ' at ${a.time}' : '';
-  return 'Your $what is on $date$at.';
+/// e.g. "Your Cardiology appointment is on Sat 12 Dec at 02:04." — the
+/// date is localized, or kept raw if it isn't "YYYY-MM-DD".
+String _appointmentText(AppLocalizations l10n, ApiAppointment a) {
+  final date = formatShortDate(a.date);
+  if (a.specialty.isEmpty) {
+    return a.time.isEmpty ? l10n.alertAppointment(date) : l10n.alertAppointmentAt(date, a.time);
+  }
+  return a.time.isEmpty ? l10n.alertSpecialty(a.specialty, date) : l10n.alertSpecialtyAt(a.specialty, date, a.time);
 }
 
 /// Header content: welcome text, light blue subtitle, avatar. The navy
 /// gradient and layout come from [CurvedHeaderPage].
 class _Header extends StatelessWidget {
-  final String firstName;
+  final String title;
   final String subtitle;
   final String initial;
   final VoidCallback onAvatarTap;
-  const _Header({required this.firstName, required this.subtitle, required this.initial, required this.onAvatarTap});
+  const _Header({required this.title, required this.subtitle, required this.initial, required this.onAvatarTap});
 
   @override
   Widget build(BuildContext context) => FadeSlideIn(
         child: Row(children: [
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-              Text('Welcome, $firstName!',
+              Text(title,
                   style: const TextStyle(color: Colors.white, fontSize: 26, fontWeight: FontWeight.w700, height: 1.2)),
               const SizedBox(height: 4),
               Text(subtitle, style: const TextStyle(color: AppColors.lightBlue, fontSize: 13.5)),
@@ -384,7 +383,7 @@ class _HeaderBackground extends StatelessWidget {
           child: DecoratedBox(
             decoration: BoxDecoration(
               gradient: RadialGradient(
-                center: Alignment.bottomRight,
+                center: AlignmentDirectional.bottomEnd,
                 radius: 1.1,
                 colors: [Color(0x666E7F9A), Color(0x006E7F9A)], // dustyBlue 40% -> clear
               ),
@@ -410,7 +409,7 @@ class _AskBar extends StatelessWidget {
         hoverScale: 1.02,
         child: Container(
           height: 54,
-          padding: const EdgeInsets.only(left: 18, right: 6),
+          padding: const EdgeInsetsDirectional.only(start: 18, end: 6),
           decoration: BoxDecoration(
             color: AppColors.chipBackground,
             border: Border.all(color: AppColors.divider),
@@ -419,8 +418,9 @@ class _AskBar extends StatelessWidget {
           child: Row(children: [
             const Icon(Icons.search_rounded, color: AppColors.textSecondary),
             const SizedBox(width: 10),
-            const Expanded(
-              child: Text('Ask DAWI anything...', style: TextStyle(color: AppColors.textSecondary, fontSize: 14)),
+            Expanded(
+              child: Text(AppLocalizations.of(context).askBarHint,
+                  style: const TextStyle(color: AppColors.textSecondary, fontSize: 14)),
             ),
             Container(
               width: 42,

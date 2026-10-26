@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/app_localizations.dart';
 import '../theme/app_theme.dart';
 import 'curved_header_page.dart';
 import 'pill_background.dart';
@@ -25,13 +26,13 @@ class AuthScaffold extends StatelessWidget {
         header: Column(
           children: [
             Align(
-              alignment: Alignment.centerLeft,
+              alignment: AlignmentDirectional.centerStart,
               child: SizedBox(
                 height: 40,
                 child: canPop
                     ? IconButton(
                         icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
-                        tooltip: 'Back',
+                        tooltip: AppLocalizations.of(context).back,
                         onPressed: () => Navigator.maybePop(context),
                       )
                     : null,

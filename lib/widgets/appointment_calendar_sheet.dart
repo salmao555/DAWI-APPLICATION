@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../core/l10n_helpers.dart';
+import '../l10n/app_localizations.dart';
 import '../models/api_models.dart';
 import '../theme/app_theme.dart';
 import 'alive.dart';
@@ -34,7 +36,6 @@ class AppointmentCalendarSheet extends StatefulWidget {
 }
 
 class _AppointmentCalendarSheetState extends State<AppointmentCalendarSheet> {
-  static const _weekdays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
   /// Appointments keyed by calendar day; ones with an unparseable date are
   /// left out of the grid but can still show in the card.
@@ -62,6 +63,7 @@ class _AppointmentCalendarSheetState extends State<AppointmentCalendarSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return SafeArea(
       child: SingleChildScrollView(
         padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.lg),
@@ -77,7 +79,7 @@ class _AppointmentCalendarSheetState extends State<AppointmentCalendarSheet> {
           Row(children: [
             IconButton(
               icon: const Icon(Icons.chevron_left_rounded, color: AppColors.primary),
-              tooltip: 'Previous month',
+              tooltip: l10n.previousMonth,
               onPressed: () => _shiftMonth(-1),
             ),
             Expanded(
@@ -89,7 +91,7 @@ class _AppointmentCalendarSheetState extends State<AppointmentCalendarSheet> {
             ),
             IconButton(
               icon: const Icon(Icons.chevron_right_rounded, color: AppColors.primary),
-              tooltip: 'Next month',
+              tooltip: l10n.nextMonth,
               onPressed: () => _shiftMonth(1),
             ),
           ]),
@@ -100,7 +102,7 @@ class _AppointmentCalendarSheetState extends State<AppointmentCalendarSheet> {
           const SizedBox(height: AppSpacing.lg),
           ElevatedButton.icon(
             icon: const Icon(Icons.event_note_outlined),
-            label: const Text('View all appointments'),
+            label: Text(l10n.viewAllAppointments),
             onPressed: () {
               Navigator.pop(context);
               widget.onViewAll();
@@ -125,10 +127,14 @@ class _AppointmentCalendarSheetState extends State<AppointmentCalendarSheet> {
       mainAxisSpacing: 4,
       crossAxisSpacing: 4,
       children: [
-        for (final w in _weekdays)
+        // Localized short weekday names, Monday first (1 Jan 2024 was a Monday).
+        for (var i = 0; i < 7; i++)
           Center(
-            child: Text(w,
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(DateFormat('EEE').format(DateTime(2024, 1, 1 + i)),
+                  style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
+            ),
           ),
         for (var i = 0; i < leading; i++) const SizedBox.shrink(),
         for (var d = 1; d <= daysInMonth; d++)
@@ -179,9 +185,7 @@ class _AppointmentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final parsed = DateTime.tryParse(appointment.date);
-    final date = parsed != null ? DateFormat('EEE d MMM').format(parsed) : appointment.date;
-    final when = [date, appointment.time].where((s) => s.isNotEmpty).join(' · ');
+    final when = appointmentWhen(appointment);
 
     return AnimatedSwitcher(
       duration: const Duration(milliseconds: 200),
@@ -200,7 +204,7 @@ class _AppointmentCard extends StatelessWidget {
           Expanded(
             child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
               Text(
-                appointment.specialty.isEmpty ? 'Appointment' : appointment.specialty,
+                appointment.specialty.isEmpty ? AppLocalizations.of(context).appointmentFallback : appointment.specialty,
                 style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 15.5, color: AppColors.textPrimary),
               ),
               const SizedBox(height: 2),

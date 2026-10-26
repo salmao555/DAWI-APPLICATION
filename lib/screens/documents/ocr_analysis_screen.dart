@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../core/constants.dart';
+import '../../core/l10n_helpers.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/api_models.dart';
 import '../../models/medication.dart';
 import '../../services/api_service.dart';
@@ -71,7 +73,7 @@ class _OcrAnalysisScreenState extends State<OcrAnalysisScreen> {
     } on ApiException catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Could not save: ${e.message}'), backgroundColor: Colors.redAccent));
+          .showSnackBar(SnackBar(content: Text(AppLocalizations.of(context).couldNotSave(e.message)), backgroundColor: Colors.redAccent));
     } finally {
       if (mounted) setState(() => _isSaving = false);
     }
@@ -82,7 +84,7 @@ class _OcrAnalysisScreenState extends State<OcrAnalysisScreen> {
     final imageUrl = apiService.resolveImageUrl(widget.scanResult.fileUrl);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Analyzing your document')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context).ocrTitle)),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.fromLTRB(AppSpacing.lg, 0, AppSpacing.lg, AppSpacing.xl),
@@ -114,40 +116,40 @@ class _OcrAnalysisScreenState extends State<OcrAnalysisScreen> {
               const SizedBox(height: AppSpacing.md),
               DropdownButtonFormField<String>(
                 value: _documentType,
-                decoration: const InputDecoration(labelText: 'Document type'),
+                decoration: InputDecoration(labelText: AppLocalizations.of(context).fieldDocumentType),
                 items: DocumentTypes.all
-                    .map((t) => DropdownMenuItem(value: t, child: Text(DocumentTypes.label(t))))
+                    .map((t) => DropdownMenuItem(value: t, child: Text(documentTypeLabel(AppLocalizations.of(context), t))))
                     .toList(),
                 onChanged: (v) => setState(() => _documentType = v ?? _documentType),
               ),
               const SizedBox(height: AppSpacing.sm),
               TextField(
                 controller: _doctorController,
-                decoration: const InputDecoration(labelText: 'Doctor', prefixIcon: Icon(Icons.badge_outlined)),
+                decoration: InputDecoration(labelText: AppLocalizations.of(context).labelDoctor, prefixIcon: const Icon(Icons.badge_outlined)),
               ),
               const SizedBox(height: AppSpacing.sm),
               TextField(
                 controller: _clinicController,
                 decoration:
-                    const InputDecoration(labelText: 'Clinic / hospital', prefixIcon: Icon(Icons.local_hospital_outlined)),
+                    InputDecoration(labelText: AppLocalizations.of(context).fieldClinic, prefixIcon: const Icon(Icons.local_hospital_outlined)),
               ),
               const SizedBox(height: AppSpacing.sm),
               TextField(
                 controller: _dateController,
                 decoration:
-                    const InputDecoration(labelText: 'Date (optional, YYYY-MM-DD)', prefixIcon: Icon(Icons.calendar_today_outlined)),
+                    InputDecoration(labelText: AppLocalizations.of(context).fieldDateOptional, prefixIcon: const Icon(Icons.calendar_today_outlined)),
               ),
               const SizedBox(height: AppSpacing.lg),
               if (_medications.isNotEmpty) ...[
-                const Text('Extracted medications', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+                Text(AppLocalizations.of(context).extractedMedications, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
                 const SizedBox(height: AppSpacing.md),
                 ..._medications.map(
                   (m) => MedicationCard(medication: m, onConfirmChanged: (val) => setState(() => m.confirmed = val)),
                 ),
               ] else
-                const Text(
-                  'No medications were detected in this document. You can still save it.',
-                  style: TextStyle(color: AppColors.textSecondary),
+                Text(
+                  AppLocalizations.of(context).noMedicationsDetected,
+                  style: const TextStyle(color: AppColors.textSecondary),
                 ),
             ],
           ),
@@ -161,7 +163,7 @@ class _OcrAnalysisScreenState extends State<OcrAnalysisScreen> {
               Expanded(
                 child: OutlinedButton(
                   onPressed: _isSaving ? null : () => Navigator.pop(context, false),
-                  child: const Text('Cancel'),
+                  child: Text(AppLocalizations.of(context).cancel),
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
@@ -172,7 +174,7 @@ class _OcrAnalysisScreenState extends State<OcrAnalysisScreen> {
                   child: _isSaving
                       ? const SizedBox(
                           height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                      : const Text('Confirm information'),
+                      : Text(AppLocalizations.of(context).confirmInformation),
                 ),
               ),
             ],

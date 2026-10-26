@@ -226,7 +226,7 @@ class _StatCardState extends State<StatCard> {
                 // Shrinks a little instead of truncating ("Appointments" on narrow phones).
                 FittedBox(
                   fit: BoxFit.scaleDown,
-                  alignment: Alignment.centerLeft,
+                  alignment: AlignmentDirectional.centerStart,
                   child: Text(
                     widget.label,
                     maxLines: 1,
@@ -240,9 +240,9 @@ class _StatCardState extends State<StatCard> {
               ],
             ),
             // Nudged into the padding and tilted so it looks placed, not boxed.
-            Positioned(
+            PositionedDirectional(
               top: -8,
-              right: -6,
+              end: -6,
               child: AnimatedScale(
                 scale: _hover || _down ? 1.06 : 1,
                 duration: const Duration(milliseconds: 150),

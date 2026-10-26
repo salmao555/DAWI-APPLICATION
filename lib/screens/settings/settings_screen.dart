@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../core/constants.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/alive.dart';
 
@@ -21,7 +20,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
   bool _generalNotifications = true;
   bool _biometricLock = false;
   bool _darkMode = false;
-  String _language = AppLanguages.all.last;
 
   @override
   Widget build(BuildContext context) {
@@ -74,17 +72,6 @@ class _SettingsScreenState extends State<SettingsScreen> {
                 title: 'Dark mode',
                 value: _darkMode,
                 onChanged: (v) => setState(() => _darkMode = v),
-              ),
-              ListTile(
-                leading: const _Bubble(Icons.language_outlined),
-                title: const Text('Language', style: _rowTitle),
-                trailing: DropdownButton<String>(
-                  value: _language,
-                  underline: const SizedBox.shrink(),
-                  borderRadius: BorderRadius.circular(AppRadius.field),
-                  items: AppLanguages.all.map((l) => DropdownMenuItem(value: l, child: Text(l))).toList(),
-                  onChanged: (v) => setState(() => _language = v ?? _language),
-                ),
               ),
             ]),
             const SizedBox(height: AppSpacing.md),

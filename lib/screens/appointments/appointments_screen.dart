@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/l10n_helpers.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/api_models.dart';
 import '../../services/api_service.dart';
 import '../../theme/app_theme.dart';
@@ -39,11 +41,11 @@ class AppointmentsScreenState extends State<AppointmentsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Appointments')),
+      appBar: AppBar(title: Text(AppLocalizations.of(context).appointmentsTitle)),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _addAppointment,
         icon: const Icon(Icons.add, color: AppColors.lightBlue),
-        label: const Text('Add appointment'),
+        label: Text(AppLocalizations.of(context).addAppointment),
       ),
       body: SafeArea(
         child: RefreshIndicator(
@@ -55,11 +57,13 @@ class AppointmentsScreenState extends State<AppointmentsScreen> {
                 return const Center(child: CircularProgressIndicator());
               }
               if (snapshot.hasError) {
-                return ListView(children: const [EmptyState(icon: Icons.cloud_off, message: "Couldn't load appointments.")]);
+                return ListView(children: [EmptyState(icon: Icons.cloud_off, message: AppLocalizations.of(context).appointmentsLoadError)]);
               }
               final appointments = snapshot.data ?? [];
               if (appointments.isEmpty) {
-                return ListView(children: const [EmptyState(icon: Icons.event_busy_outlined, message: 'No upcoming appointments.')]);
+                return ListView(children: [
+                  EmptyState(icon: Icons.event_busy_outlined, message: AppLocalizations.of(context).noUpcomingAppointments),
+                ]);
               }
               return ListView.builder(
                 padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.md, AppSpacing.md, 96),
@@ -80,10 +84,10 @@ class _AppointmentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final when = '${appointment.date} ${appointment.time}'.trim();
+    final when = appointmentWhen(appointment);
     return AppTile(
       icon: Icons.event_outlined,
-      title: appointment.specialty.isEmpty ? 'Appointment' : appointment.specialty,
+      title: appointment.specialty.isEmpty ? AppLocalizations.of(context).appointmentFallback : appointment.specialty,
       subtitle: appointment.location.isEmpty ? when : '$when\n${appointment.location}',
       maxSubtitleLines: 2,
       trailing: _StatusBadge(status: appointment.status),
@@ -104,7 +108,7 @@ class _StatusBadge extends StatelessWidget {
         color: upcoming ? AppColors.darkCard : color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(20),
       ),
-      child: Text(status, style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w600)),
+      child: Text(appointmentStatusLabel(AppLocalizations.of(context), status), style: TextStyle(color: color, fontSize: 11, fontWeight: FontWeight.w600)),
     );
   }
 }
@@ -146,6 +150,7 @@ class _AddAppointmentSheetState extends State<_AddAppointmentSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: EdgeInsets.only(
         left: AppSpacing.lg,
@@ -157,25 +162,25 @@ class _AddAppointmentSheetState extends State<_AddAppointmentSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Add appointment', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18)),
+          Text(l10n.addAppointment, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18)),
           const SizedBox(height: AppSpacing.md),
-          TextField(controller: _specialtyController, decoration: const InputDecoration(labelText: 'Specialty / reason for visit')),
+          TextField(controller: _specialtyController, decoration: InputDecoration(labelText: l10n.fieldSpecialty)),
           const SizedBox(height: AppSpacing.sm),
           Row(children: [
-            Expanded(child: TextField(controller: _dateController, decoration: const InputDecoration(labelText: 'Date (YYYY-MM-DD)'))),
+            Expanded(child: TextField(controller: _dateController, decoration: InputDecoration(labelText: l10n.fieldDate))),
             const SizedBox(width: AppSpacing.sm),
-            Expanded(child: TextField(controller: _timeController, decoration: const InputDecoration(labelText: 'Time (HH:MM)'))),
+            Expanded(child: TextField(controller: _timeController, decoration: InputDecoration(labelText: l10n.fieldTime))),
           ]),
           const SizedBox(height: AppSpacing.sm),
-          TextField(controller: _locationController, decoration: const InputDecoration(labelText: 'Location')),
+          TextField(controller: _locationController, decoration: InputDecoration(labelText: l10n.fieldLocation)),
           const SizedBox(height: AppSpacing.sm),
-          TextField(controller: _reasonController, decoration: const InputDecoration(labelText: 'Notes (optional)')),
+          TextField(controller: _reasonController, decoration: InputDecoration(labelText: l10n.fieldNotesOptional)),
           const SizedBox(height: AppSpacing.lg),
           ElevatedButton(
             onPressed: _isSaving ? null : _save,
             child: _isSaving
                 ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                : const Text('Save'),
+                : Text(l10n.save),
           ),
         ],
       ),

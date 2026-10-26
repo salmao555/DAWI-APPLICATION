@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../core/l10n_helpers.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/api_models.dart';
 import '../../services/api_service.dart';
 import '../../theme/app_theme.dart';
@@ -39,13 +41,14 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('My Health'),
+        title: Text(l10n.myHealthTitle),
         actions: [
           IconButton(
             icon: const Icon(Icons.auto_awesome_outlined),
-            tooltip: 'AI Health Summary',
+            tooltip: l10n.aiHealthSummary,
             onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const _AiHealthSummarySheet())),
           ),
         ],
@@ -58,7 +61,7 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
               return const Center(child: CircularProgressIndicator());
             }
             if (snapshot.hasError) {
-              return Center(child: Text("Couldn't load your medical record.\n${snapshot.error}", textAlign: TextAlign.center));
+              return Center(child: Text(l10n.medicalRecordLoadError('${snapshot.error}'), textAlign: TextAlign.center));
             }
             final record = snapshot.data!;
             return ListView(
@@ -68,7 +71,7 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
                   Expanded(
                     child: OutlinedButton.icon(
                       icon: const Icon(Icons.medication_outlined, size: 18),
-                      label: const Text('Medications'),
+                      label: Text(l10n.quickMedications),
                       style: AppButtons.dark,
                       onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MedicationsScreen())),
                     ),
@@ -77,7 +80,7 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
                   Expanded(
                     child: OutlinedButton.icon(
                       icon: const Icon(Icons.event_outlined, size: 18),
-                      label: const Text('Appointments'),
+                      label: Text(l10n.quickAppointments),
                       style: AppButtons.dark,
                       onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AppointmentsScreen())),
                     ),
@@ -87,50 +90,52 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const SectionTitle('Personal information'),
-                    TextButton(onPressed: () => _editHealthProfile(record.healthProfile), child: const Text('Edit')),
+                    SectionTitle(l10n.sectionPersonalInformation),
+                    TextButton(onPressed: () => _editHealthProfile(record.healthProfile), child: Text(l10n.edit)),
                   ],
                 ),
                 const SizedBox(height: AppSpacing.sm),
                 AppPanel(
                   child: record.healthProfile == null
-                      ? const Text('No health profile added yet.', style: TextStyle(color: AppColors.textSecondary))
+                      ? Text(l10n.noHealthProfile, style: const TextStyle(color: AppColors.textSecondary))
                       : Column(children: [
-                          _InfoRow('Date of birth', record.healthProfile!.dateOfBirth),
-                          _InfoRow('Blood group', record.healthProfile!.bloodGroup),
-                          _InfoRow('Allergies', record.healthProfile!.allergies),
-                          _InfoRow('Conditions', record.healthProfile!.conditions),
-                          _InfoRow('Emergency contact', [
+                          _InfoRow(l10n.labelDateOfBirth, formatLongDate(record.healthProfile!.dateOfBirth)),
+                          _InfoRow(l10n.labelBloodGroup, record.healthProfile!.bloodGroup),
+                          _InfoRow(l10n.labelAllergies, record.healthProfile!.allergies),
+                          _InfoRow(l10n.labelConditions, record.healthProfile!.conditions),
+                          _InfoRow(l10n.labelEmergencyContact, [
                             record.healthProfile!.emergencyContactName,
                             record.healthProfile!.emergencyContactPhone,
                           ].where((s) => s.isNotEmpty).join(' · ')),
                         ]),
                 ),
                 const SizedBox(height: AppSpacing.lg),
-                const SectionTitle('Active medications'),
+                SectionTitle(l10n.sectionActiveMedications),
                 const SizedBox(height: AppSpacing.md),
                 if (record.activeMedications.isEmpty)
-                  const Text('No active medications.', style: TextStyle(color: AppColors.textSecondary))
+                  Text(l10n.noActiveMedications, style: const TextStyle(color: AppColors.textSecondary))
                 else
                   ...record.activeMedications.map((m) => AppTile(icon: Icons.medication_outlined, title: m.name, subtitle: '${m.dose} · ${m.frequency}')),
                 const SizedBox(height: AppSpacing.lg),
-                const SectionTitle('Doctors'),
+                SectionTitle(l10n.sectionDoctors),
                 const SizedBox(height: AppSpacing.md),
                 if (record.doctors.isEmpty)
-                  const Text('No doctors added yet.', style: TextStyle(color: AppColors.textSecondary))
+                  Text(l10n.noDoctorsYet, style: const TextStyle(color: AppColors.textSecondary))
                 else
                   ...record.doctors.map((d) => AppTile(icon: Icons.badge_outlined, title: d.name, subtitle: d.specialty)),
                 const SizedBox(height: AppSpacing.lg),
-                const SectionTitle('Recent documents'),
+                SectionTitle(l10n.sectionRecentDocuments),
                 const SizedBox(height: AppSpacing.md),
                 if (record.recentDocuments.isEmpty)
-                  const Text('No documents yet.', style: TextStyle(color: AppColors.textSecondary))
+                  Text(l10n.noDocumentsShort, style: const TextStyle(color: AppColors.textSecondary))
                 else
                   ...record.recentDocuments.map((d) => AppTile(
                         icon: Icons.description_outlined,
                         maxSubtitleLines: 2,
                         title: d.aiSummary.isNotEmpty ? d.aiSummary : d.documentType,
-                        subtitle: d.documentDate.isNotEmpty ? 'Source: ${d.documentType} — ${d.documentDate}' : 'Source: ${d.documentType}',
+                        subtitle: d.documentDate.isNotEmpty
+                            ? l10n.documentSourceDated(documentTypeLabel(l10n, d.documentType), formatLongDate(d.documentDate))
+                            : l10n.documentSource(documentTypeLabel(l10n, d.documentType)),
                       )),
               ],
             );
@@ -140,7 +145,7 @@ class _MedicalRecordScreenState extends State<MedicalRecordScreen> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const AiAssistantScreen())),
         icon: const Icon(Icons.smart_toy_outlined, color: AppColors.lightBlue),
-        label: const Text('Ask Assistant'),
+        label: Text(l10n.askAssistant),
       ),
     );
   }
@@ -155,7 +160,7 @@ class _InfoRow extends StatelessWidget {
         padding: const EdgeInsets.only(bottom: 8),
         child: Row(children: [
           Expanded(child: Text(label, style: const TextStyle(color: AppColors.textSecondary))),
-          Flexible(child: Text(value.isEmpty ? '—' : value, textAlign: TextAlign.right, style: const TextStyle(fontWeight: FontWeight.w600))),
+          Flexible(child: Text(value.isEmpty ? '—' : value, textAlign: TextAlign.end, style: const TextStyle(fontWeight: FontWeight.w600))),
         ]),
       );
 }
@@ -199,6 +204,7 @@ class _HealthProfileSheetState extends State<_HealthProfileSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: EdgeInsets.only(
         left: AppSpacing.lg,
@@ -211,25 +217,25 @@ class _HealthProfileSheetState extends State<_HealthProfileSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Health profile', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18)),
+            Text(l10n.healthProfileTitle, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18)),
             const SizedBox(height: AppSpacing.md),
-            TextField(controller: _dobController, decoration: const InputDecoration(labelText: 'Date of birth (YYYY-MM-DD)')),
+            TextField(controller: _dobController, decoration: InputDecoration(labelText: l10n.fieldDateOfBirth)),
             const SizedBox(height: AppSpacing.sm),
-            TextField(controller: _bloodController, decoration: const InputDecoration(labelText: 'Blood group')),
+            TextField(controller: _bloodController, decoration: InputDecoration(labelText: l10n.labelBloodGroup)),
             const SizedBox(height: AppSpacing.sm),
-            TextField(controller: _allergiesController, decoration: const InputDecoration(labelText: 'Allergies')),
+            TextField(controller: _allergiesController, decoration: InputDecoration(labelText: l10n.labelAllergies)),
             const SizedBox(height: AppSpacing.sm),
-            TextField(controller: _conditionsController, decoration: const InputDecoration(labelText: 'Known conditions')),
+            TextField(controller: _conditionsController, decoration: InputDecoration(labelText: l10n.fieldKnownConditions)),
             const SizedBox(height: AppSpacing.sm),
-            TextField(controller: _emergencyNameController, decoration: const InputDecoration(labelText: 'Emergency contact name')),
+            TextField(controller: _emergencyNameController, decoration: InputDecoration(labelText: l10n.fieldEmergencyName)),
             const SizedBox(height: AppSpacing.sm),
-            TextField(controller: _emergencyPhoneController, decoration: const InputDecoration(labelText: 'Emergency contact phone')),
+            TextField(controller: _emergencyPhoneController, decoration: InputDecoration(labelText: l10n.fieldEmergencyPhone)),
             const SizedBox(height: AppSpacing.lg),
             ElevatedButton(
               onPressed: _isSaving ? null : _save,
               child: _isSaving
                   ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                  : const Text('Save and continue'),
+                  : Text(l10n.saveAndContinue),
             ),
           ],
         ),
@@ -255,8 +261,9 @@ class _AiHealthSummarySheetState extends State<_AiHealthSummarySheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('AI Health Summary')),
+      appBar: AppBar(title: Text(l10n.aiHealthSummary)),
       body: SafeArea(
         child: FutureBuilder<AiHealthSummary>(
           future: _future,
@@ -265,21 +272,21 @@ class _AiHealthSummarySheetState extends State<_AiHealthSummarySheet> {
               return const Center(child: CircularProgressIndicator());
             }
             if (snapshot.hasError) {
-              return Center(child: Text("The AI assistant is temporarily unavailable.\n${snapshot.error}", textAlign: TextAlign.center));
+              return Center(child: Text(l10n.aiSummaryUnavailable('${snapshot.error}'), textAlign: TextAlign.center));
             }
             final s = snapshot.data!;
             return ListView(
               padding: const EdgeInsets.all(AppSpacing.lg),
               children: [
-                const Text('Current situation', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
+                Text(l10n.summaryCurrentSituation, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 16)),
                 const SizedBox(height: AppSpacing.sm),
                 Text(s.currentSituation, style: const TextStyle(fontSize: 14, height: 1.5)),
                 const SizedBox(height: AppSpacing.lg),
-                if (s.currentTreatments.isNotEmpty) _bulletSection('Current treatments', s.currentTreatments),
-                if (s.recentAnalyses.isNotEmpty) _bulletSection('Recent analyses', s.recentAnalyses),
-                if (s.upcomingAppointments.isNotEmpty) _bulletSection('Upcoming appointments', s.upcomingAppointments),
-                if (s.importantInformation.isNotEmpty) _bulletSection('Important information', s.importantInformation),
-                if (s.generalRecommendations.isNotEmpty) _bulletSection('General recommendations', s.generalRecommendations),
+                if (s.currentTreatments.isNotEmpty) _bulletSection(l10n.summaryCurrentTreatments, s.currentTreatments),
+                if (s.recentAnalyses.isNotEmpty) _bulletSection(l10n.summaryRecentAnalyses, s.recentAnalyses),
+                if (s.upcomingAppointments.isNotEmpty) _bulletSection(l10n.summaryUpcomingAppointments, s.upcomingAppointments),
+                if (s.importantInformation.isNotEmpty) _bulletSection(l10n.summaryImportantInfo, s.importantInformation),
+                if (s.generalRecommendations.isNotEmpty) _bulletSection(l10n.summaryRecommendations, s.generalRecommendations),
                 Padding(
                   padding: const EdgeInsets.only(top: AppSpacing.md),
                   child: Text(s.generatedNote, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, fontStyle: FontStyle.italic)),

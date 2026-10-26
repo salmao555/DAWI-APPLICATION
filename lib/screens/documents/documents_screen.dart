@@ -1,8 +1,9 @@
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
 import '../../core/constants.dart';
+import '../../core/l10n_helpers.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/api_models.dart';
 import '../../services/api_service.dart';
 import '../../theme/app_theme.dart';
@@ -53,7 +54,7 @@ class DocumentsScreenState extends State<DocumentsScreen> {
     } on ApiException catch (e) {
       _showError(e.message);
     } catch (e) {
-      _showError('Could not access camera/gallery: $e');
+      if (mounted) _showError(AppLocalizations.of(context).errorCameraAccess('$e'));
     } finally {
       if (mounted) setState(() => _isUploading = false);
     }
@@ -74,8 +75,8 @@ class DocumentsScreenState extends State<DocumentsScreen> {
           children: [
             ListTile(
               leading: const Icon(Icons.photo_camera_outlined, color: AppColors.primary),
-              title: const Text('Scan document'),
-              subtitle: const Text('Use your camera'),
+              title: Text(AppLocalizations.of(context).scanDocument),
+              subtitle: Text(AppLocalizations.of(context).useYourCamera),
               onTap: () {
                 Navigator.pop(context);
                 _pickAndScan(ImageSource.camera);
@@ -83,8 +84,8 @@ class DocumentsScreenState extends State<DocumentsScreen> {
             ),
             ListTile(
               leading: const Icon(Icons.image_outlined, color: AppColors.primary),
-              title: const Text('Upload from gallery'),
-              subtitle: const Text('Photos, JPG or PNG'),
+              title: Text(AppLocalizations.of(context).uploadFromGallery),
+              subtitle: Text(AppLocalizations.of(context).photosFormats),
               onTap: () {
                 Navigator.pop(context);
                 _pickAndScan(ImageSource.gallery);
@@ -98,12 +99,13 @@ class DocumentsScreenState extends State<DocumentsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
-      appBar: AppBar(title: const Text('Documents')),
+      appBar: AppBar(title: Text(l10n.documentsTitle)),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _isUploading ? null : _showScanUploadSheet,
         icon: const Icon(Icons.add, color: AppColors.lightBlue),
-        label: const Text('Add document'),
+        label: Text(l10n.addDocument),
       ),
       body: SafeArea(
         child: Stack(
@@ -116,14 +118,14 @@ class DocumentsScreenState extends State<DocumentsScreen> {
                     scrollDirection: Axis.horizontal,
                     padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
                     children: [
-                      _FilterChip(label: 'All', selected: _typeFilter == null, onTap: () {
+                      _FilterChip(label: l10n.filterAll, selected: _typeFilter == null, onTap: () {
                         setState(() => _typeFilter = null);
                         refresh();
                       }),
                       ...DocumentTypes.all.map((t) => Padding(
-                            padding: const EdgeInsets.only(left: AppSpacing.sm),
+                            padding: const EdgeInsetsDirectional.only(start: AppSpacing.sm),
                             child: _FilterChip(
-                              label: DocumentTypes.label(t),
+                              label: documentTypeLabel(l10n, t),
                               selected: _typeFilter == t,
                               onTap: () {
                                 setState(() => _typeFilter = t);
@@ -145,13 +147,13 @@ class DocumentsScreenState extends State<DocumentsScreen> {
                         }
                         if (snapshot.hasError) {
                           return ListView(children: [
-                            EmptyState(icon: Icons.cloud_off, message: "Couldn't load documents.\n${snapshot.error}"),
+                            EmptyState(icon: Icons.cloud_off, message: l10n.documentsLoadError('${snapshot.error}')),
                           ]);
                         }
                         final docs = snapshot.data ?? [];
                         if (docs.isEmpty) {
-                          return ListView(children: const [
-                            EmptyState(icon: Icons.folder_open_outlined, message: 'No medical documents yet.'),
+                          return ListView(children: [
+                            EmptyState(icon: Icons.folder_open_outlined, message: l10n.noDocumentsYet),
                           ]);
                         }
                         return ListView.builder(
@@ -168,14 +170,14 @@ class DocumentsScreenState extends State<DocumentsScreen> {
             if (_isUploading)
               Container(
                 color: Colors.black.withValues(alpha: 0.35),
-                child: const Center(
+                child: Center(
                   child: Card(
                     child: Padding(
-                      padding: EdgeInsets.all(AppSpacing.lg),
+                      padding: const EdgeInsets.all(AppSpacing.lg),
                       child: Column(mainAxisSize: MainAxisSize.min, children: [
-                        CircularProgressIndicator(),
-                        SizedBox(height: AppSpacing.md),
-                        Text('Analyzing your document...'),
+                        const CircularProgressIndicator(),
+                        const SizedBox(height: AppSpacing.md),
+                        Text(l10n.analyzingDocument),
                       ]),
                     ),
                   ),
@@ -211,12 +213,10 @@ class _DocumentCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final imageUrl = apiService.resolveImageUrl(document.fileUrl);
-    final dateStr = document.documentDate.isNotEmpty
-        ? document.documentDate
-        : DateFormat('d MMM yyyy').format(document.createdAt);
+    final dateStr = formatDocumentDate(document.documentDate, document.createdAt, 'd MMM yyyy');
 
     return AppTile(
-      title: DocumentTypes.label(document.documentType),
+      title: documentTypeLabel(AppLocalizations.of(context), document.documentType),
       subtitle: document.doctorName.isEmpty ? dateStr : '${document.doctorName} · $dateStr',
       onTap: () => Navigator.push(
         context,

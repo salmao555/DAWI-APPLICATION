@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../core/constants.dart';
+import '../../core/l10n_helpers.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/api_models.dart';
 import '../../services/api_service.dart';
 import '../../theme/app_theme.dart';
@@ -47,18 +49,19 @@ class MedicationsScreenState extends State<MedicationsScreen> with SingleTickerP
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Medications'),
+        title: Text(l10n.medicationsTitle),
         bottom: TabBar(
           controller: _tabController,
-          tabs: const [Tab(text: 'Active'), Tab(text: 'Completed'), Tab(text: 'Upcoming')],
+          tabs: [Tab(text: l10n.medStatusActive), Tab(text: l10n.medStatusCompleted), Tab(text: l10n.medStatusUpcoming)],
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _addMedication,
         icon: const Icon(Icons.add, color: AppColors.lightBlue),
-        label: const Text('Add medication'),
+        label: Text(l10n.addMedication),
       ),
       body: SafeArea(
         child: RefreshIndicator(
@@ -70,7 +73,7 @@ class MedicationsScreenState extends State<MedicationsScreen> with SingleTickerP
                 return const Center(child: CircularProgressIndicator());
               }
               if (snapshot.hasError) {
-                return ListView(children: [EmptyState(icon: Icons.cloud_off, message: "Couldn't load medications.")]);
+                return ListView(children: [EmptyState(icon: Icons.cloud_off, message: l10n.medicationsLoadError)]);
               }
               final all = snapshot.data ?? [];
               return TabBarView(
@@ -96,7 +99,9 @@ class _MedicationList extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (medications.isEmpty) {
-      return ListView(children: const [EmptyState(icon: Icons.medication_outlined, message: 'No medications here yet.')]);
+      return ListView(children: [
+        EmptyState(icon: Icons.medication_outlined, message: AppLocalizations.of(context).noMedicationsHere),
+      ]);
     }
     return ListView.builder(
       padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.md, AppSpacing.md, 96),
@@ -156,6 +161,7 @@ class _AddMedicationSheetState extends State<_AddMedicationSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Padding(
       padding: EdgeInsets.only(
         left: AppSpacing.lg,
@@ -167,21 +173,21 @@ class _AddMedicationSheetState extends State<_AddMedicationSheet> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('Add medication', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 18)),
+          Text(l10n.addMedication, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 18)),
           const SizedBox(height: AppSpacing.md),
-          TextField(controller: _nameController, decoration: const InputDecoration(labelText: 'Medication name')),
+          TextField(controller: _nameController, decoration: InputDecoration(labelText: l10n.fieldMedicationName)),
           const SizedBox(height: AppSpacing.sm),
-          TextField(controller: _doseController, decoration: const InputDecoration(labelText: 'Dose')),
+          TextField(controller: _doseController, decoration: InputDecoration(labelText: l10n.fieldDose)),
           const SizedBox(height: AppSpacing.sm),
-          TextField(controller: _frequencyController, decoration: const InputDecoration(labelText: 'Frequency')),
+          TextField(controller: _frequencyController, decoration: InputDecoration(labelText: l10n.fieldFrequency)),
           const SizedBox(height: AppSpacing.sm),
-          TextField(controller: _timingController, decoration: const InputDecoration(labelText: 'Timing')),
+          TextField(controller: _timingController, decoration: InputDecoration(labelText: l10n.fieldTiming)),
           const SizedBox(height: AppSpacing.sm),
           DropdownButtonFormField<String>(
             value: _status,
-            decoration: const InputDecoration(labelText: 'Status'),
+            decoration: InputDecoration(labelText: l10n.fieldStatus),
             items: MedicationStatus.all
-                .map((s) => DropdownMenuItem(value: s, child: Text(MedicationStatus.label(s))))
+                .map((s) => DropdownMenuItem(value: s, child: Text(medicationStatusLabel(l10n, s))))
                 .toList(),
             onChanged: (v) => setState(() => _status = v ?? _status),
           ),
@@ -190,7 +196,7 @@ class _AddMedicationSheetState extends State<_AddMedicationSheet> {
             onPressed: _isSaving ? null : _save,
             child: _isSaving
                 ? const SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                : const Text('Save'),
+                : Text(l10n.save),
           ),
         ],
       ),

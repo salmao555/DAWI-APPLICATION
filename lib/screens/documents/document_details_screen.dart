@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
 
-import '../../core/constants.dart';
+import '../../core/l10n_helpers.dart';
+import '../../l10n/app_localizations.dart';
 import '../../models/api_models.dart';
 import '../../models/medication.dart';
 import '../../services/api_service.dart';
@@ -35,11 +35,11 @@ class _DocumentDetailsScreenState extends State<DocumentDetailsScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete document?'),
-        content: const Text('This will remove the document and its extracted medications.'),
+        title: Text(AppLocalizations.of(context).deleteDocumentTitle),
+        content: Text(AppLocalizations.of(context).deleteDocumentBody),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: const Text('Cancel')),
-          TextButton(onPressed: () => Navigator.pop(context, true), child: const Text('Delete')),
+          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(AppLocalizations.of(context).cancel)),
+          TextButton(onPressed: () => Navigator.pop(context, true), child: Text(AppLocalizations.of(context).delete)),
         ],
       ),
     );
@@ -58,7 +58,7 @@ class _DocumentDetailsScreenState extends State<DocumentDetailsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Document details'),
+        title: Text(AppLocalizations.of(context).documentDetailsTitle),
         actions: [
           IconButton(icon: const Icon(Icons.delete_outline), onPressed: _delete),
         ],
@@ -74,7 +74,7 @@ class _DocumentDetailsScreenState extends State<DocumentDetailsScreen> {
               return Center(
                 child: Padding(
                   padding: const EdgeInsets.all(AppSpacing.lg),
-                  child: Text("Couldn't load this document.\n${snapshot.error ?? ''}",
+                  child: Text(AppLocalizations.of(context).documentLoadError('${snapshot.error ?? ''}'),
                       textAlign: TextAlign.center, style: const TextStyle(color: AppColors.textSecondary)),
                 ),
               );
@@ -83,9 +83,8 @@ class _DocumentDetailsScreenState extends State<DocumentDetailsScreen> {
             final d = snapshot.data!;
             final imageUrl = apiService.resolveImageUrl(d.fileUrl);
             final medications = d.medications.map(Medication.fromApi).toList();
-            final dateStr = d.documentDate.isNotEmpty
-                ? d.documentDate
-                : DateFormat('d MMMM yyyy').format(d.createdAt);
+            final l10n = AppLocalizations.of(context);
+            final dateStr = formatDocumentDate(d.documentDate, d.createdAt, 'd MMMM yyyy');
 
             return SingleChildScrollView(
               padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.xl),
@@ -105,13 +104,13 @@ class _DocumentDetailsScreenState extends State<DocumentDetailsScreen> {
                   const SizedBox(height: AppSpacing.md),
                   AppPanel(
                     child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                      _DetailRow(icon: Icons.description_outlined, label: 'Type', value: DocumentTypes.label(d.documentType)),
+                      _DetailRow(icon: Icons.description_outlined, label: l10n.labelType, value: documentTypeLabel(l10n, d.documentType)),
                       const SizedBox(height: 10),
-                      _DetailRow(icon: Icons.badge_outlined, label: 'Doctor', value: d.doctorName.isEmpty ? 'Unknown' : d.doctorName),
+                      _DetailRow(icon: Icons.badge_outlined, label: l10n.labelDoctor, value: d.doctorName.isEmpty ? l10n.unknown : d.doctorName),
                       const SizedBox(height: 10),
-                      _DetailRow(icon: Icons.local_hospital_outlined, label: 'Clinic', value: d.clinicName.isEmpty ? 'Unknown' : d.clinicName),
+                      _DetailRow(icon: Icons.local_hospital_outlined, label: l10n.labelClinic, value: d.clinicName.isEmpty ? l10n.unknown : d.clinicName),
                       const SizedBox(height: 10),
-                      _DetailRow(icon: Icons.calendar_today_outlined, label: 'Date', value: dateStr),
+                      _DetailRow(icon: Icons.calendar_today_outlined, label: l10n.labelDate, value: dateStr),
                     ]),
                   ),
                   if (d.aiSummary.isNotEmpty) ...[
@@ -131,7 +130,7 @@ class _DocumentDetailsScreenState extends State<DocumentDetailsScreen> {
                     Expanded(
                       child: OutlinedButton.icon(
                         icon: const Icon(Icons.auto_awesome_outlined, size: 18),
-                        label: const Text('AI Explanation'),
+                        label: Text(l10n.aiExplanation),
                         style: AppButtons.dark,
                         onPressed: () => Navigator.push(
                           context,
@@ -143,7 +142,7 @@ class _DocumentDetailsScreenState extends State<DocumentDetailsScreen> {
                     Expanded(
                       child: OutlinedButton.icon(
                         icon: const Icon(Icons.smart_toy_outlined, size: 18),
-                        label: const Text('Ask AI'),
+                        label: Text(l10n.askAi),
                         style: AppButtons.dark,
                         onPressed: () => Navigator.push(
                           context,
@@ -154,7 +153,7 @@ class _DocumentDetailsScreenState extends State<DocumentDetailsScreen> {
                   ]),
                   if (medications.isNotEmpty) ...[
                     const SizedBox(height: AppSpacing.lg),
-                    const SectionTitle('Medications'),
+                    SectionTitle(l10n.sectionMedications),
                     const SizedBox(height: AppSpacing.md),
                     ...medications.map((m) => MedicationCard(medication: m)),
                   ],
@@ -185,7 +184,7 @@ class _DetailRow extends StatelessWidget {
       const SizedBox(width: AppSpacing.sm),
       Text(label, style: const TextStyle(color: AppColors.textSecondary, fontSize: 13.5)),
       const Spacer(),
-      Flexible(child: Text(value, textAlign: TextAlign.right, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14))),
+      Flexible(child: Text(value, textAlign: TextAlign.end, style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14))),
     ]);
   }
 }

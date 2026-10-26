@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/locale_provider.dart';
 import '../../screens/auth/login_screen.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/alive.dart';
@@ -18,35 +20,87 @@ class ProfileScreen extends StatelessWidget {
     Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const LoginScreen()), (route) => false);
   }
 
+  /// Bottom sheet with the three app languages. Picking one switches the
+  /// UI immediately and saves it on this device. (There's no backend
+  /// endpoint to update preferred_language after sign-up yet.)
+  void _pickLanguage(BuildContext context) {
+    final localeProvider = context.read<LocaleProvider>();
+    final current = localeProvider.locale.languageCode;
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(AppSpacing.lg, AppSpacing.md, AppSpacing.lg, AppSpacing.lg),
+          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.stretch, children: [
+            Center(
+              child: Container(
+                width: 44,
+                height: 5,
+                decoration: BoxDecoration(color: AppColors.divider, borderRadius: BorderRadius.circular(3)),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            SectionTitle(AppLocalizations.of(sheetContext).chooseLanguage),
+            const SizedBox(height: AppSpacing.md),
+            for (final (code, name) in LocaleProvider.pickerOptions)
+              AppTile(
+                icon: Icons.language_outlined,
+                title: name,
+                trailing: code == current ? const Icon(Icons.check_circle_rounded, color: AppColors.primary) : null,
+                onTap: () {
+                  Navigator.pop(sheetContext);
+                  localeProvider.setLocale(Locale(code));
+                },
+              ),
+          ]),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     final user = context.watch<AuthProvider>().user;
-    final name = user?.fullName.isNotEmpty == true ? user!.fullName : 'Your profile';
+    final languageName = context.watch<LocaleProvider>().displayName(user);
+    final name = user?.fullName.isNotEmpty == true ? user!.fullName : l10n.profileFallbackName;
     final initial = user?.firstName.isNotEmpty == true ? user!.firstName[0].toUpperCase() : '?';
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Profile')),
+      appBar: AppBar(title: Text(l10n.profileTitle)),
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(AppSpacing.lg),
           children: [
             FadeSlideIn(child: _ProfileHero(name: name, email: user?.email ?? '', initial: initial)),
             const SizedBox(height: AppSpacing.lg),
-            const SectionTitle('Personal info'),
+            SectionTitle(l10n.sectionPersonalInfo),
             const SizedBox(height: AppSpacing.md),
-            AppTile(icon: Icons.phone_outlined, title: 'Phone', trailing: _Value(user?.phone.isEmpty ?? true ? 'Not set' : user!.phone)),
-            AppTile(icon: Icons.language_outlined, title: 'Preferred language', trailing: _Value(user?.preferredLanguage ?? 'English')),
+            AppTile(
+              icon: Icons.phone_outlined,
+              title: l10n.fieldPhone,
+              trailing: _Value(user?.phone.isEmpty ?? true ? l10n.notSet : user!.phone),
+            ),
+            AppTile(
+              icon: Icons.language_outlined,
+              title: l10n.fieldPreferredLanguage,
+              trailing: Row(mainAxisSize: MainAxisSize.min, children: [
+                _Value(languageName),
+                const Icon(Icons.chevron_right_rounded, color: AppColors.textSecondary),
+              ]),
+              onTap: () => _pickLanguage(context),
+            ),
             const SizedBox(height: AppSpacing.sm),
-            const SectionTitle('Account'),
+            SectionTitle(l10n.sectionAccount),
             const SizedBox(height: AppSpacing.md),
             AppTile(
               icon: Icons.settings_outlined,
-              title: 'Settings',
+              title: l10n.settingsTitle,
               onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const SettingsScreen())),
             ),
             AppTile(
               icon: Icons.privacy_tip_outlined,
-              title: 'Privacy & Security',
+              title: l10n.privacySecurity,
               onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PrivacyScreen())),
             ),
             const SizedBox(height: AppSpacing.md),
@@ -55,7 +109,7 @@ class ProfileScreen extends StatelessWidget {
               child: OutlinedButton.icon(
                 onPressed: () => _logout(context),
                 icon: const Icon(Icons.logout, color: Colors.redAccent),
-                label: const Text('Logout', style: TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w600)),
+                label: Text(l10n.logout, style: const TextStyle(color: Colors.redAccent, fontWeight: FontWeight.w600)),
                 style: OutlinedButton.styleFrom(
                   backgroundColor: AppColors.cardBackground,
                   side: const BorderSide(color: Colors.redAccent),

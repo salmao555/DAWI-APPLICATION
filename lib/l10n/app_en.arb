@@ -15,5 +15,360 @@
   "onboarding3Title": "AI Health Assistant",
   "onboarding3Body": "Ask questions in plain language and get explanations of medical terms and summaries of your validated information.",
   "onboarding4Title": "Reminders & Monitoring",
-  "onboarding4Body": "Never miss a dose or an appointment, with reminders and general health guidance tailored to you."
+  "onboarding4Body": "Never miss a dose or an appointment, with reminders and general health guidance tailored to you.",
+  "back": "Back",
+  "loginTitle": "Welcome back",
+  "loginSubtitle": "Log in to access your health dashboard.",
+  "fieldEmail": "Email",
+  "fieldPassword": "Password",
+  "validationEmail": "Enter a valid email",
+  "validationPasswordLength": "At least 8 characters",
+  "forgotPasswordLink": "Forgot password?",
+  "loginButton": "Login",
+  "loginFailed": "Login failed",
+  "noAccountLink": "Don't have an account? Create one",
+  "registerTitle": "Create account",
+  "registerSubtitle": "Join DAWI to keep your health organized.",
+  "fieldFirstName": "First name",
+  "fieldLastName": "Last name",
+  "fieldPhone": "Phone",
+  "fieldConfirmPassword": "Confirm password",
+  "fieldPreferredLanguage": "Preferred language",
+  "validationRequired": "Required",
+  "validationPasswordsMismatch": "Passwords do not match",
+  "registerButton": "Create account",
+  "registerFailed": "Registration failed",
+  "resetTitle": "Reset password",
+  "resetSubtitle": "We'll help you get back into your account.",
+  "resetIntro": "Enter your email and we'll send you a link to reset your password.",
+  "resetSendButton": "Send reset link",
+  "resetSent": "If an account exists for {email}, a reset link has been sent.",
+  "@resetSent": {
+    "placeholders": {
+      "email": {
+        "type": "String"
+      }
+    }
+  },
+  "backToLogin": "Back to login",
+  "docTypePrescription": "Prescription",
+  "docTypeLabReport": "Lab Report",
+  "docTypeMedicalReport": "Medical Report",
+  "docTypeCertificate": "Certificate",
+  "docTypeImaging": "Imaging",
+  "docTypeOther": "Other",
+  "medStatusActive": "Active",
+  "medStatusCompleted": "Completed",
+  "medStatusUpcoming": "Upcoming",
+  "apptStatusUpcoming": "upcoming",
+  "apptStatusCompleted": "completed",
+  "apptStatusCancelled": "cancelled",
+  "scanWithCamera": "Scan with camera",
+  "uploadFromGallery": "Upload from gallery",
+  "errorCameraAccess": "Could not access camera/gallery: {error}",
+  "@errorCameraAccess": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "analyzingDocument": "Analyzing your document...",
+  "greetingMorning": "Good morning",
+  "greetingAfternoon": "Good afternoon",
+  "greetingEvening": "Good evening",
+  "homeSubtitle": "{greeting} · How are you feeling today?",
+  "@homeSubtitle": {
+    "placeholders": {
+      "greeting": {
+        "type": "String"
+      }
+    }
+  },
+  "homeWelcomeName": "Welcome, {name}!",
+  "@homeWelcomeName": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "homeWelcome": "Welcome!",
+  "homeLoadError": "Couldn't load your dashboard.\n{error}",
+  "@homeLoadError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "askBarHint": "Ask DAWI anything...",
+  "quickScanDocument": "Scan document",
+  "quickAskAi": "Ask AI",
+  "quickMedications": "Medications",
+  "quickAppointments": "Appointments",
+  "statTreatments": "{count, plural, =1{Treatment} other{Treatments}}",
+  "@statTreatments": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statAppointments": "{count, plural, =1{Appointment} other{Appointments}}",
+  "@statAppointments": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "statDocuments": "{count, plural, =1{Document} other{Documents}}",
+  "@statDocuments": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "sectionCategories": "Categories",
+  "sectionTodaysReminders": "Today's reminders",
+  "nothingScheduledToday": "Nothing scheduled for today.",
+  "sectionRecentActivity": "Recent activity",
+  "noRecentActivity": "No recent activity yet — scan your first document to get started.",
+  "appointmentFallback": "Appointment",
+  "documentAdded": "{type} added",
+  "@documentAdded": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "alertAppointment": "Your appointment is on {date}.",
+  "@alertAppointment": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "alertAppointmentAt": "Your appointment is on {date} at {time}.",
+  "@alertAppointmentAt": {
+    "placeholders": {
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "alertSpecialty": "Your {specialty} appointment is on {date}.",
+  "@alertSpecialty": {
+    "placeholders": {
+      "specialty": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "alertSpecialtyAt": "Your {specialty} appointment is on {date} at {time}.",
+  "@alertSpecialtyAt": {
+    "placeholders": {
+      "specialty": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "previousMonth": "Previous month",
+  "nextMonth": "Next month",
+  "viewAllAppointments": "View all appointments",
+  "profileTitle": "Profile",
+  "profileFallbackName": "Your profile",
+  "sectionPersonalInfo": "Personal info",
+  "sectionAccount": "Account",
+  "notSet": "Not set",
+  "settingsTitle": "Settings",
+  "privacySecurity": "Privacy & Security",
+  "logout": "Logout",
+  "chooseLanguage": "Choose your language",
+  "documentsTitle": "Documents",
+  "scanDocument": "Scan document",
+  "useYourCamera": "Use your camera",
+  "photosFormats": "Photos, JPG or PNG",
+  "addDocument": "Add document",
+  "filterAll": "All",
+  "documentsLoadError": "Couldn't load documents.\n{error}",
+  "@documentsLoadError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "noDocumentsYet": "No medical documents yet.",
+  "deleteDocumentTitle": "Delete document?",
+  "deleteDocumentBody": "This will remove the document and its extracted medications.",
+  "cancel": "Cancel",
+  "delete": "Delete",
+  "documentDetailsTitle": "Document details",
+  "documentLoadError": "Couldn't load this document.\n{error}",
+  "@documentLoadError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "labelType": "Type",
+  "labelDoctor": "Doctor",
+  "labelClinic": "Clinic",
+  "labelDate": "Date",
+  "unknown": "Unknown",
+  "aiExplanation": "AI Explanation",
+  "askAi": "Ask AI",
+  "sectionMedications": "Medications",
+  "couldNotSave": "Could not save: {error}",
+  "@couldNotSave": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "ocrTitle": "Analyzing your document",
+  "fieldDocumentType": "Document type",
+  "fieldClinic": "Clinic / hospital",
+  "fieldDateOptional": "Date (optional, YYYY-MM-DD)",
+  "extractedMedications": "Extracted medications",
+  "noMedicationsDetected": "No medications were detected in this document. You can still save it.",
+  "confirmInformation": "Confirm information",
+  "fieldDose": "Dose",
+  "fieldFrequency": "Frequency",
+  "fieldTiming": "Timing",
+  "medicationsTitle": "Medications",
+  "addMedication": "Add medication",
+  "medicationsLoadError": "Couldn't load medications.",
+  "noMedicationsHere": "No medications here yet.",
+  "fieldMedicationName": "Medication name",
+  "fieldStatus": "Status",
+  "save": "Save",
+  "medicationDetailsTitle": "Medication details",
+  "medicationLoadError": "Couldn't load this medication.",
+  "labelPrescribedBy": "Prescribed by",
+  "labelStartDate": "Start date",
+  "labelEndDate": "End date",
+  "reminderSchedule": "Reminder schedule",
+  "slotMorning": "Morning",
+  "slotAfternoon": "Afternoon",
+  "slotEvening": "Evening",
+  "slotCustom": "Custom",
+  "reminderSetFor": "Reminder set for: {slots}",
+  "@reminderSetFor": {
+    "placeholders": {
+      "slots": {
+        "type": "String"
+      }
+    }
+  },
+  "createReminder": "Create reminder",
+  "appointmentsTitle": "Appointments",
+  "addAppointment": "Add appointment",
+  "appointmentsLoadError": "Couldn't load appointments.",
+  "noUpcomingAppointments": "No upcoming appointments.",
+  "fieldSpecialty": "Specialty / reason for visit",
+  "fieldDate": "Date (YYYY-MM-DD)",
+  "fieldTime": "Time (HH:MM)",
+  "fieldLocation": "Location",
+  "fieldNotesOptional": "Notes (optional)",
+  "chatSuggest1": "Explain this document to me.",
+  "chatSuggest2": "What does this medical term mean?",
+  "chatSuggest3": "Summarize my latest analyses.",
+  "chatSuggest4": "What are my next appointments?",
+  "chatSuggest5": "Remind me about my medications.",
+  "chatSuggest6": "Prepare questions for my doctor.",
+  "chatGreeting": "Hello! How can I help you today?",
+  "chatUnavailable": "The AI assistant is temporarily unavailable: {error}",
+  "@chatUnavailable": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "chatTitle": "Health Assistant",
+  "chatInputHint": "Ask your Health Assistant...",
+  "myHealthTitle": "My Health",
+  "aiHealthSummary": "AI Health Summary",
+  "medicalRecordLoadError": "Couldn't load your medical record.\n{error}",
+  "@medicalRecordLoadError": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "sectionPersonalInformation": "Personal information",
+  "edit": "Edit",
+  "noHealthProfile": "No health profile added yet.",
+  "labelDateOfBirth": "Date of birth",
+  "labelBloodGroup": "Blood group",
+  "labelAllergies": "Allergies",
+  "labelConditions": "Conditions",
+  "labelEmergencyContact": "Emergency contact",
+  "sectionActiveMedications": "Active medications",
+  "noActiveMedications": "No active medications.",
+  "sectionDoctors": "Doctors",
+  "noDoctorsYet": "No doctors added yet.",
+  "sectionRecentDocuments": "Recent documents",
+  "noDocumentsShort": "No documents yet.",
+  "documentSource": "Source: {type}",
+  "@documentSource": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      }
+    }
+  },
+  "documentSourceDated": "Source: {type} — {date}",
+  "@documentSourceDated": {
+    "placeholders": {
+      "type": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  },
+  "askAssistant": "Ask Assistant",
+  "healthProfileTitle": "Health profile",
+  "fieldDateOfBirth": "Date of birth (YYYY-MM-DD)",
+  "fieldKnownConditions": "Known conditions",
+  "fieldEmergencyName": "Emergency contact name",
+  "fieldEmergencyPhone": "Emergency contact phone",
+  "saveAndContinue": "Save and continue",
+  "aiSummaryUnavailable": "The AI assistant is temporarily unavailable.\n{error}",
+  "@aiSummaryUnavailable": {
+    "placeholders": {
+      "error": {
+        "type": "String"
+      }
+    }
+  },
+  "summaryCurrentSituation": "Current situation",
+  "summaryCurrentTreatments": "Current treatments",
+  "summaryRecentAnalyses": "Recent analyses",
+  "summaryUpcomingAppointments": "Upcoming appointments",
+  "summaryImportantInfo": "Important information",
+  "summaryRecommendations": "General recommendations"
 }

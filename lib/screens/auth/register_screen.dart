@@ -3,6 +3,8 @@ import 'package:provider/provider.dart';
 
 import '../../core/constants.dart';
 import '../../providers/auth_provider.dart';
+import '../../providers/locale_provider.dart';
+import '../../l10n/app_localizations.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/auth_scaffold.dart';
 import '../home/main_shell.dart';
@@ -23,7 +25,26 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
   String _language = AppLanguages.all.last; // English
+  bool _languageFromApp = false;
   bool _obscure = true;
+
+  /// Start the dropdown on the language the app is already shown in.
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_languageFromApp) return;
+    _languageFromApp = true;
+    final code = context.read<LocaleProvider>().locale.languageCode;
+    _language = LocaleProvider.pickerOptions.firstWhere((o) => o.$1 == code).$2;
+  }
+
+  /// Picking a language switches the app right away (and saves it); the
+  /// label itself is sent to the backend with the sign-up request.
+  void _onLanguageChanged(String? value) {
+    if (value == null) return;
+    setState(() => _language = value);
+    context.read<LocaleProvider>().setLocale(Locale(LocaleProvider.codeForBackendLabel(value)));
+  }
 
   @override
   void dispose() {
@@ -52,7 +73,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (_) => const MainShell()), (route) => false);
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(auth.errorMessage ?? 'Registration failed'), backgroundColor: Colors.redAccent),
+        SnackBar(content: Text(auth.errorMessage ?? AppLocalizations.of(context).registerFailed), backgroundColor: Colors.redAccent),
       );
     }
   }
@@ -60,10 +81,11 @@ class _RegisterScreenState extends State<RegisterScreen> {
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
+    final l10n = AppLocalizations.of(context);
 
     return AuthScaffold(
-      title: 'Create account',
-      subtitle: 'Join DAWI to keep your health organized.',
+      title: l10n.registerTitle,
+      subtitle: l10n.registerSubtitle,
       child: Form(
         key: _formKey,
         child: Column(
@@ -74,16 +96,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 Expanded(
                   child: TextFormField(
                     controller: _firstNameController,
-                    decoration: const InputDecoration(labelText: 'First name'),
-                    validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
+                    decoration: InputDecoration(labelText: l10n.fieldFirstName),
+                    validator: (v) => (v == null || v.isEmpty) ? l10n.validationRequired : null,
                   ),
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: TextFormField(
                     controller: _lastNameController,
-                    decoration: const InputDecoration(labelText: 'Last name'),
-                    validator: (v) => (v == null || v.isEmpty) ? 'Required' : null,
+                    decoration: InputDecoration(labelText: l10n.fieldLastName),
+                    validator: (v) => (v == null || v.isEmpty) ? l10n.validationRequired : null,
                   ),
                 ),
               ],
@@ -92,42 +114,42 @@ class _RegisterScreenState extends State<RegisterScreen> {
             TextFormField(
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(labelText: 'Email', prefixIcon: Icon(Icons.email_outlined)),
-              validator: (v) => (v == null || !v.contains('@')) ? 'Enter a valid email' : null,
+              decoration: InputDecoration(labelText: l10n.fieldEmail, prefixIcon: const Icon(Icons.email_outlined)),
+              validator: (v) => (v == null || !v.contains('@')) ? l10n.validationEmail : null,
             ),
             const SizedBox(height: AppSpacing.sm),
             TextFormField(
               controller: _phoneController,
               keyboardType: TextInputType.phone,
-              decoration: const InputDecoration(labelText: 'Phone', prefixIcon: Icon(Icons.phone_outlined)),
+              decoration: InputDecoration(labelText: l10n.fieldPhone, prefixIcon: const Icon(Icons.phone_outlined)),
             ),
             const SizedBox(height: AppSpacing.sm),
             TextFormField(
               controller: _passwordController,
               obscureText: _obscure,
               decoration: InputDecoration(
-                labelText: 'Password',
+                labelText: l10n.fieldPassword,
                 prefixIcon: const Icon(Icons.lock_outline),
                 suffixIcon: IconButton(
                   icon: Icon(_obscure ? Icons.visibility_outlined : Icons.visibility_off_outlined),
                   onPressed: () => setState(() => _obscure = !_obscure),
                 ),
               ),
-              validator: (v) => (v == null || v.length < 8) ? 'At least 8 characters' : null,
+              validator: (v) => (v == null || v.length < 8) ? l10n.validationPasswordLength : null,
             ),
             const SizedBox(height: AppSpacing.sm),
             TextFormField(
               controller: _confirmPasswordController,
               obscureText: _obscure,
-              decoration: const InputDecoration(labelText: 'Confirm password', prefixIcon: Icon(Icons.lock_outline)),
-              validator: (v) => v != _passwordController.text ? 'Passwords do not match' : null,
+              decoration: InputDecoration(labelText: l10n.fieldConfirmPassword, prefixIcon: const Icon(Icons.lock_outline)),
+              validator: (v) => v != _passwordController.text ? l10n.validationPasswordsMismatch : null,
             ),
             const SizedBox(height: AppSpacing.sm),
             DropdownButtonFormField<String>(
               value: _language,
-              decoration: const InputDecoration(labelText: 'Preferred language'),
+              decoration: InputDecoration(labelText: l10n.fieldPreferredLanguage),
               items: AppLanguages.all.map((lang) => DropdownMenuItem(value: lang, child: Text(lang))).toList(),
-              onChanged: (v) => setState(() => _language = v ?? _language),
+              onChanged: _onLanguageChanged,
             ),
             const SizedBox(height: AppSpacing.lg),
             ElevatedButton(
@@ -138,7 +160,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       width: 20,
                       child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                     )
-                  : const Text('Create account'),
+                  : Text(l10n.registerButton),
             ),
           ],
         ),

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../providers/auth_provider.dart';
+import '../../l10n/app_localizations.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/auth_scaffold.dart';
 import '../home/main_shell.dart';
@@ -38,17 +39,18 @@ class _LoginScreenState extends State<LoginScreen> {
     } else {
       ScaffoldMessenger.of(
         context,
-      ).showSnackBar(SnackBar(content: Text(auth.errorMessage ?? 'Login failed'), backgroundColor: Colors.redAccent));
+      ).showSnackBar(SnackBar(content: Text(auth.errorMessage ?? AppLocalizations.of(context).loginFailed), backgroundColor: Colors.redAccent));
     }
   }
 
   @override
   Widget build(BuildContext context) {
     final auth = context.watch<AuthProvider>();
+    final l10n = AppLocalizations.of(context);
 
     return AuthScaffold(
-      title: 'Welcome back',
-      subtitle: 'Log in to access your health dashboard.',
+      title: l10n.loginTitle,
+      subtitle: l10n.loginSubtitle,
       child: Form(
         key: _formKey,
         child: Column(
@@ -57,29 +59,29 @@ class _LoginScreenState extends State<LoginScreen> {
             TextFormField(
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(labelText: 'Email', prefixIcon: Icon(Icons.email_outlined)),
-              validator: (v) => (v == null || !v.contains('@')) ? 'Enter a valid email' : null,
+              decoration: InputDecoration(labelText: l10n.fieldEmail, prefixIcon: const Icon(Icons.email_outlined)),
+              validator: (v) => (v == null || !v.contains('@')) ? l10n.validationEmail : null,
             ),
             const SizedBox(height: AppSpacing.sm),
             TextFormField(
               controller: _passwordController,
               obscureText: _obscurePassword,
               decoration: InputDecoration(
-                labelText: 'Password',
+                labelText: l10n.fieldPassword,
                 prefixIcon: const Icon(Icons.lock_outline),
                 suffixIcon: IconButton(
                   icon: Icon(_obscurePassword ? Icons.visibility_outlined : Icons.visibility_off_outlined),
                   onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
                 ),
               ),
-              validator: (v) => (v == null || v.length < 8) ? 'At least 8 characters' : null,
+              validator: (v) => (v == null || v.length < 8) ? l10n.validationPasswordLength : null,
             ),
             Align(
-              alignment: Alignment.centerRight,
+              alignment: AlignmentDirectional.centerEnd,
               child: TextButton(
                 onPressed: () =>
                     Navigator.push(context, MaterialPageRoute(builder: (_) => const ForgotPasswordScreen())),
-                child: const Text('Forgot password?'),
+                child: Text(l10n.forgotPasswordLink),
               ),
             ),
             const SizedBox(height: AppSpacing.sm),
@@ -91,13 +93,13 @@ class _LoginScreenState extends State<LoginScreen> {
                       width: 20,
                       child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                     )
-                  : const Text('Login'),
+                  : Text(l10n.loginButton),
             ),
             const SizedBox(height: AppSpacing.md),
             Center(
               child: TextButton(
                 onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const RegisterScreen())),
-                child: const Text("Don't have an account? Create one"),
+                child: Text(l10n.noAccountLink),
               ),
             ),
           ],

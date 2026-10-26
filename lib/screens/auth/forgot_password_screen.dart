@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../l10n/app_localizations.dart';
 import '../../theme/app_theme.dart';
 import '../../widgets/auth_scaffold.dart';
 
@@ -26,35 +27,36 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return AuthScaffold(
-      title: 'Reset password',
-      subtitle: "We'll help you get back into your account.",
+      title: l10n.resetTitle,
+      subtitle: l10n.resetSubtitle,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (!_sent) ...[
-            const Text(
-              "Enter your email and we'll send you a link to reset your password.",
-              style: TextStyle(color: AppColors.textSecondary),
+            Text(
+              l10n.resetIntro,
+              style: const TextStyle(color: AppColors.textSecondary),
             ),
             const SizedBox(height: AppSpacing.lg),
             TextField(
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(labelText: 'Email', prefixIcon: Icon(Icons.email_outlined)),
+              decoration: InputDecoration(labelText: l10n.fieldEmail, prefixIcon: const Icon(Icons.email_outlined)),
             ),
             const SizedBox(height: AppSpacing.lg),
-            ElevatedButton(onPressed: () => setState(() => _sent = true), child: const Text('Send reset link')),
+            ElevatedButton(onPressed: () => setState(() => _sent = true), child: Text(l10n.resetSendButton)),
           ] else ...[
             const Icon(Icons.mark_email_read_outlined, size: 48, color: AppColors.success),
             const SizedBox(height: AppSpacing.md),
             Text(
-              'If an account exists for ${_emailController.text}, a reset link has been sent.',
+              l10n.resetSent(_emailController.text),
               style: const TextStyle(color: AppColors.textSecondary),
             ),
             const SizedBox(height: AppSpacing.lg),
             Center(
-              child: TextButton(onPressed: () => Navigator.pop(context), child: const Text('Back to login')),
+              child: TextButton(onPressed: () => Navigator.pop(context), child: Text(l10n.backToLogin)),
             ),
           ],
         ],
