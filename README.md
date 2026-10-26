@@ -25,15 +25,6 @@ Prescriptions in Morocco are often written in French and dense medical terminolo
 | AI | Claude (Anthropic API) |
 | Packaging | Docker, docker compose, nginx |
 
-## Screenshots
-
-<div align="center">
-<img src="https://github.com/user-attachments/assets/75f7154a-487c-4ec6-a1d2-70e08ed6b8ea" width="180" alt="Home" />
-<img src="https://github.com/user-attachments/assets/8c82e6ee-2174-4ec5-8205-904c2a3d6aae" width="180" alt="Documents" />
-<img src="https://github.com/user-attachments/assets/bd75e43e-7127-467f-9704-4ae7d9b2b903" width="180" alt="My Health" />
-<img src="https://github.com/user-attachments/assets/3578ab07-0eb5-4c9e-82c0-dc9b4bd1f974" width="180" alt="AI Assistant" />
-</div>
-
 ---
 
 # Setup guide
